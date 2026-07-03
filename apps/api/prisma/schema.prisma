@@ -1,0 +1,595 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Nutzer ────────────────────────────────────────────────────────────────
+
+enum AuthProvider {
+  EMAIL
+  GOOGLE
+  APPLE
+  GUEST
+}
+
+enum Role {
+  USER
+  ADMIN
+  DEALER
+}
+
+model User {
+  id                String        @id @default(cuid())
+  email             String?       @unique
+  passwordHash      String?
+  authProvider      AuthProvider  @default(GUEST)
+  role              Role          @default(USER)
+  locale            String        @default("de")
+  country           String        @default("DE")
+  // Datenschutz-Schalter (DSGVO): Nutzer kann Personalisierung/Analytics abschalten
+  personalizationEnabled Boolean  @default(true)
+  analyticsConsent  Boolean       @default(false)
+  scoresEnabled     Json?         // aktivierte Quartett-Scores, null = Default-Set
+  preferredDiscoveryMode String?  // inspiration | listings — zuletzt gewählter Modus
+  pushCategories    Json?         // { newMatch: bool, priceDrop: bool, favoriteGone: bool, savedSearch: bool, dealerReply: bool, superMatch: bool }
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  locations         UserLocation[]
+  swipes            SwipeEvent[]
+  favorites         Favorite[]
+  savedSearches     SavedSearch[]
+  recommendationProfile RecommendationProfile?
+  recommendationResults RecommendationResult[]
+  leads             Lead[]
+  subscriptions     Subscription[]
+  pushTokens        PushToken[]
+  analyticsEvents   AnalyticsEvent[]
+}
+
+model UserLocation {
+  id         String   @id @default(cuid())
+  userId     String
+  latitude   Float
+  longitude  Float
+  postalCode String?
+  city       String?
+  country    String   @default("DE")
+  radiusKm   Int?     // null = landesweit
+  isCurrent  Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isCurrent])
+}
+
+model PushToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  platform  String // ios | android | web
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─── Fahrzeuge / Inserate ──────────────────────────────────────────────────
+
+enum FuelType {
+  PETROL
+  DIESEL
+  ELECTRIC
+  HYBRID
+  PLUGIN_HYBRID
+  LPG
+  CNG
+  OTHER
+}
+
+enum Transmission {
+  MANUAL
+  AUTOMATIC
+  SEMI_AUTOMATIC
+}
+
+enum Drivetrain {
+  FWD
+  RWD
+  AWD
+}
+
+enum BodyType {
+  SEDAN
+  WAGON
+  SUV
+  COUPE
+  CONVERTIBLE
+  HATCHBACK
+  VAN
+  PICKUP
+  OTHER
+}
+
+enum SellerType {
+  DEALER
+  PRIVATE
+}
+
+model VehicleListing {
+  id                String       @id @default(cuid())
+  provider          String // z. B. "demo", "mobile_de", "partner_feed"
+  providerListingId String
+  sourceUrl         String? // intern; UI nur über CTA "Zum Inserat"
+  make              String
+  model             String
+  variant           String?
+  title             String
+  description       String?
+  price             Int // in ganzen Einheiten der Währung (EUR)
+  currency          String       @default("EUR")
+  year              Int?
+  firstRegistration String?
+  mileage           Int?
+  powerKw           Int?
+  powerHp           Int?
+  fuelType          FuelType?
+  transmission      Transmission?
+  drivetrain        Drivetrain?
+  bodyType          BodyType?
+  doors             Int?
+  seats             Int?
+  color             String?
+  interior          String?
+  features          Json? // string[]
+  consumptionL100   Float?
+  co2GKm            Int?
+  displacementCcm   Int?
+  previousOwners    Int?
+  accidentFree      Boolean?
+  inspectionValidUntil String?
+  fullServiceHistory Boolean?
+  warranty          Boolean?
+  financingAvailable Boolean?
+  images            Json // string[]
+  imagesAreDemo     Boolean      @default(false)
+  sellerType        SellerType   @default(DEALER)
+  dealerId          String?
+  latitude          Float?
+  longitude         Float?
+  postalCode        String?
+  city              String?
+  country           String       @default("DE")
+  isAvailable       Boolean      @default(true)
+  qualityScore      Float        @default(0.5) // Vollständigkeit/Qualität des Inserats 0–1
+  // Hybrid: optionale Zuordnung zu einem generellen VehicleModel
+  vehicleModelId       String?
+  modelMatchConfidence Float?
+  modelMatchReason     String?
+  rawData           Json?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  lastSyncedAt      DateTime     @default(now())
+
+  dealer     Dealer?          @relation(fields: [dealerId], references: [id])
+  specs      VehicleSpecs?
+  swipes     SwipeEvent[]
+  favorites  Favorite[]
+  leads      Lead[]
+  sponsored  SponsoredListing[]
+  priceHistory PriceHistory[]
+  recommendationResults RecommendationResult[]
+  modelMatches VehicleModelToListingMatch[]
+
+  @@unique([provider, providerListingId])
+  @@index([vehicleModelId])
+  @@index([latitude, longitude])
+  @@index([make, model])
+  @@index([price])
+  @@index([isAvailable, createdAt])
+}
+
+model PriceHistory {
+  id        String   @id @default(cuid())
+  listingId String
+  price     Int
+  recordedAt DateTime @default(now())
+
+  listing VehicleListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([listingId, recordedAt])
+}
+
+model VehicleSpecs {
+  id              String  @id @default(cuid())
+  listingId       String  @unique
+  zeroToHundred   Float?
+  topSpeed        Int?
+  weightKg        Int?
+  lengthMm        Int?
+  widthMm         Int?
+  heightMm        Int?
+  trunkVolumeL    Int?
+  consumptionL100 Float?
+  co2GKm          Int?
+  batteryCapacityKwh Float?
+  electricRangeKm Int?
+  chargingSpeedKw Int?
+  confidence      Float   @default(0) // 0–1 Match-Konfidenz des Enrichments
+  source          String? // Enrichment-Quelle
+  verified        Boolean @default(false) // manuell im Admin-Panel bestätigt
+
+  listing VehicleListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+}
+
+// ─── Interaktionen ─────────────────────────────────────────────────────────
+
+enum SwipeAction {
+  LIKE
+  DISLIKE
+  SUPERLIKE
+  SKIP
+}
+
+model SwipeEvent {
+  id              String      @id @default(cuid())
+  userId          String
+  listingId       String
+  action          SwipeAction
+  dwellTimeMs     Int?
+  openedDetails   Boolean     @default(false)
+  openedMore      Boolean     @default(false)
+  contactedDealer Boolean     @default(false)
+  undone          Boolean     @default(false)
+  createdAt       DateTime    @default(now())
+
+  user    User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing VehicleListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([listingId, action])
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  listingId String
+  createdAt DateTime @default(now())
+
+  user    User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing VehicleListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, listingId])
+}
+
+model SavedSearch {
+  id            String   @id @default(cuid())
+  userId        String
+  name          String
+  filterJson    Json // VehicleFilters + LocationQuery
+  alertsEnabled Boolean  @default(false)
+  lastNotifiedAt DateTime?
+  createdAt     DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─── Empfehlungen ──────────────────────────────────────────────────────────
+
+model RecommendationProfile {
+  id                   String   @id @default(cuid())
+  userId               String   @unique
+  weightsJson          Json // UserPreferenceProfile (gewichtete Präferenzen)
+  dislikedPatternsJson Json?
+  signalCount          Int      @default(0)
+  lastUpdatedAt        DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model RecommendationResult {
+  id                 String   @id @default(cuid())
+  userId             String
+  listingId          String
+  score              Float // organischer Score
+  sponsoredBoost     Float    @default(0) // strikt getrennt vom organischen Score
+  explanationJson    Json? // RecommendationExplanation
+  scoreBreakdownJson Json? // ScoreBreakdown
+  createdAt          DateTime @default(now())
+
+  user    User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing VehicleListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+// ─── Händler & Monetarisierung (MVP: vorbereitet) ──────────────────────────
+
+model Dealer {
+  id        String   @id @default(cuid())
+  name      String
+  email     String?
+  phone     String?
+  address   String?
+  city      String?
+  country   String   @default("DE")
+  source    String? // Provider, über den der Händler bekannt ist
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  listings  VehicleListing[]
+  leads     Lead[]
+  sponsored SponsoredListing[]
+  users     DealerUser[]
+}
+
+// Vorbereitung Händler-Self-Service (Phase 3) — im MVP ungenutzt
+model DealerUser {
+  id        String   @id @default(cuid())
+  dealerId  String
+  email     String   @unique
+  role      String   @default("member")
+  createdAt DateTime @default(now())
+
+  dealer Dealer @relation(fields: [dealerId], references: [id], onDelete: Cascade)
+}
+
+enum LeadType {
+  GENERAL
+  TEST_DRIVE
+  FINANCE
+  AVAILABILITY
+  CALLBACK
+  MESSAGE
+}
+
+enum LeadStatus {
+  NEW
+  SENT
+  ANSWERED
+  CLOSED
+}
+
+model Lead {
+  id                 String     @id @default(cuid())
+  userId             String
+  listingId          String
+  dealerId           String?
+  type               LeadType
+  status             LeadStatus @default(NEW)
+  message            String?
+  contactEmail       String?
+  contactPhone       String?
+  source             String     @default("app") // app | web | push
+  monetizationStatus String     @default("UNBILLED") // UNBILLED | BILLABLE | BILLED
+  payoutStatus       String     @default("NONE")
+  campaignId         String?
+  createdAt          DateTime   @default(now())
+
+  user    User           @relation(fields: [userId], references: [id])
+  listing VehicleListing @relation(fields: [listingId], references: [id])
+  dealer  Dealer?        @relation(fields: [dealerId], references: [id])
+
+  @@index([dealerId, status])
+}
+
+enum SubscriptionPlan {
+  FREE
+  PREMIUM
+}
+
+model Subscription {
+  id        String   @id @default(cuid())
+  userId    String
+  plan      SubscriptionPlan @default(FREE)
+  status    String   @default("active")
+  provider  String? // stripe | apple | google
+  externalId String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum SponsoredStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  ENDED
+}
+
+model SponsoredListing {
+  id         String          @id @default(cuid())
+  listingId  String
+  dealerId   String
+  campaignId String?
+  status     SponsoredStatus @default(DRAFT)
+  boost      Float           @default(0.1) // separater Sponsored-Boost, nie im organischen Score
+  startDate  DateTime?
+  endDate    DateTime?
+
+  listing VehicleListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  dealer  Dealer         @relation(fields: [dealerId], references: [id], onDelete: Cascade)
+}
+
+// ─── Betrieb / Analytics ───────────────────────────────────────────────────
+
+model ImportLog {
+  id          String   @id @default(cuid())
+  provider    String
+  status      String // ok | error
+  imported    Int      @default(0)
+  updated     Int      @default(0)
+  deactivated Int      @default(0)
+  errorText   String?
+  startedAt   DateTime @default(now())
+  finishedAt  DateTime?
+
+  @@index([provider, startedAt])
+}
+
+model ProviderState {
+  id        String   @id @default(cuid())
+  provider  String   @unique
+  enabled   Boolean  @default(true)
+  lastSyncAt DateTime?
+  lastError String?
+  meta      Json?
+}
+
+model FeatureFlag {
+  key       String  @id
+  enabled   Boolean @default(false)
+  note      String?
+}
+
+/// Datenschutzfreundliches Event-Tracking: keine Inhalte, nur Ereignistypen.
+/// userId nullable — anonyme Events möglich; Nutzer kann Löschung verlangen.
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  userId    String?
+  type      String // swipe_like, swipe_dislike, superlike, detail_open, more_open, lead_created, search_used, push_optin, ...
+  meta      Json?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([type, createdAt])
+}
+
+// ─── Hybrid: Inspirationsmodus (Fahrzeugmodelle, keine Inserate) ───────────
+
+/// Generelles Fahrzeugmodell/Baureihe für den Inspirationsmodus.
+/// Strikt getrennt von VehicleListing (echtes Inserat).
+model VehicleModel {
+  id                  String   @id @default(cuid())
+  make                String
+  model               String
+  generation          String?
+  variant             String?
+  productionStartYear Int?
+  productionEndYear   Int?
+  bodyType            BodyType?
+  vehicleSize         String? // small | compact | midsize | large
+  segment             String? // z. B. "Sportlimousine", "Power-Kombi"
+  doors               Int?
+  seats               Int?
+  drivetrain          Drivetrain?
+  fuelTypes           Json? // FuelType[]
+  transmissionTypes   Json? // Transmission[]
+  minPowerHp          Int?
+  maxPowerHp          Int?
+  typicalUsedPriceMin Int?
+  typicalUsedPriceMax Int?
+  imageUrls           Json // string[]
+  imagesAreDemo       Boolean  @default(false)
+  description         String?
+  strengthsJson       Json? // string[] (i18n-Keys oder Texte)
+  weaknessesJson      Json?
+  tagsJson            Json? // string[] z. B. ["performance","alltag"]
+  specsJson           Json? // flexible Zusatzdaten
+  source              String   @default("DEMO") // DEMO | lizenzierte Quelle
+  sourceConfidence    Float    @default(0.5)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  specs         VehicleModelSpecs?
+  modelSwipes   ModelSwipeEvent[]
+  listingMatches VehicleModelToListingMatch[]
+
+  @@unique([make, model, variant])
+  @@index([bodyType, segment])
+}
+
+model VehicleModelSpecs {
+  id              String  @id @default(cuid())
+  vehicleModelId  String  @unique
+  zeroToHundred   Float?
+  topSpeed        Int?
+  weightKg        Int?
+  lengthMm        Int?
+  widthMm         Int?
+  heightMm        Int?
+  trunkVolumeL    Int?
+  consumptionL100 Float?
+  co2GKm          Int?
+  batteryCapacityKwh Float?
+  electricRangeKm Int?
+  chargingSpeedKw Int?
+  confidence      Float   @default(0)
+  source          String?
+  verified        Boolean @default(false)
+
+  vehicleModel VehicleModel @relation(fields: [vehicleModelId], references: [id], onDelete: Cascade)
+}
+
+model ModelSwipeEvent {
+  id             String      @id @default(cuid())
+  userId         String
+  vehicleModelId String
+  action         SwipeAction
+  dwellTimeMs    Int?
+  openedDetails  Boolean     @default(false)
+  openedMore     Boolean     @default(false)
+  undone         Boolean     @default(false)
+  createdAt      DateTime    @default(now())
+
+  vehicleModel VehicleModel @relation(fields: [vehicleModelId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([vehicleModelId, action])
+}
+
+/// Geschmacksprofil aus Inspirationsmodus + Inseratsverhalten (Hybrid).
+model UserTasteProfile {
+  id                       String   @id @default(cuid())
+  userId                   String   @unique
+  preferredMakesJson       Json?
+  preferredModelsJson      Json?
+  preferredSegmentsJson    Json?
+  preferredBodyTypesJson   Json?
+  preferredVehicleSizesJson Json?
+  preferredFuelTypesJson   Json?
+  preferredTransmissionsJson Json?
+  preferredDrivetrainsJson Json?
+  preferredPowerRangeJson  Json? // { targetHp }
+  preferredPriceRangeJson  Json? // { min, max }
+  preferredUseCasesJson    Json? // Tag-Gewichte
+  dislikedPatternsJson     Json?
+  strongPositiveSignalsJson Json?
+  strongNegativeSignalsJson Json?
+  confidence               Float    @default(0)
+  summaryText              String?
+  signalCount              Int      @default(0)
+  lastUpdatedAt            DateTime @default(now())
+}
+
+model TasteProfileInsight {
+  id          String   @id @default(cuid())
+  userId      String
+  insightType String // topSegment | topMake | powerPreference | ...
+  titleKey    String // i18n-Key für die App
+  paramsJson  Json?
+  confidence  Float    @default(0.5)
+  createdAt   DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+/// Zuordnung Modell ↔ echte Inserate ("Ähnliche echte Angebote").
+model VehicleModelToListingMatch {
+  id             String   @id @default(cuid())
+  vehicleModelId String
+  listingId      String
+  matchScore     Float
+  matchReasonJson Json?
+  createdAt      DateTime @default(now())
+
+  vehicleModel VehicleModel   @relation(fields: [vehicleModelId], references: [id], onDelete: Cascade)
+  listing      VehicleListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@unique([vehicleModelId, listingId])
+}
