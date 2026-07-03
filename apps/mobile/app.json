@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "CarMatch",
+    "slug": "carmatch",
+    "version": "0.1.0",
+    "scheme": "carmatch",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0E0F12",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "de.carmatch.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "CarMatch nutzt deinen Standort nur, um Fahrzeuge in deiner Umgebung zu finden."
+      }
+    },
+    "android": {
+      "package": "de.carmatch.app",
+      "permissions": ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"]
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    },
+    "plugins": ["expo-router", "expo-localization", "expo-location", "expo-notifications"],
+    "extra": {
+      "apiUrl": "http://localhost:4100"
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "name": "carmatch",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CarMatch — Swipe-basierte Auto-Discovery- und Kaufentscheidungs-App (iOS/Android/Web)",
+  "workspaces": [
+    "packages/*",
+    "apps/api",
+    "apps/admin"
+  ],
+  "scripts": {
+    "api:dev": "npm run dev -w apps/api",
+    "api:test": "npm run test -w apps/api",
+    "api:seed": "npm run seed -w apps/api",
+    "admin:dev": "npm run dev -w apps/admin",
+    "mobile:start": "cd apps/mobile && npm start",
+    "typecheck": "npm run typecheck -w apps/api",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md}\""
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3"
+  }
+}
