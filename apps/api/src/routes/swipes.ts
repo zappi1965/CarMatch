@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 import { prisma } from '../db.js'
 import { updateProfileFromSwipe } from '../services/recommendationService.js'
+import { recalculateTasteProfile } from '../services/tasteProfileService.js'
 import { track } from '../services/analyticsService.js'
 
 const swipeSchema = z.object({
@@ -32,6 +33,8 @@ export async function swipeRoutes(app: FastifyInstance) {
     }
 
     await updateProfileFromSwipe(req.user.sub, swipe.id)
+    // Hybrid: Inseratsverhalten fließt auch ins Geschmacksprofil ein
+    await recalculateTasteProfile(req.user.sub)
     await track(`swipe_${body.action.toLowerCase()}`, req.user.sub)
     return { ok: true, data: { id: swipe.id } }
   })

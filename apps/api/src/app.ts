@@ -13,6 +13,10 @@ import { recommendationRoutes } from './routes/recommendations.js'
 import { leadRoutes } from './routes/leads.js'
 import { settingsRoutes } from './routes/settings.js'
 import { adminRoutes } from './routes/admin.js'
+import { vehicleModelRoutes } from './routes/vehicleModels.js'
+import { modelSwipeRoutes } from './routes/modelSwipes.js'
+import { tasteProfileRoutes } from './routes/tasteProfile.js'
+import { discoveryRoutes } from './routes/discovery.js'
 
 export async function buildApp() {
   const app = Fastify({ logger: config.NODE_ENV !== 'test' })
@@ -42,6 +46,11 @@ export async function buildApp() {
   await app.register(leadRoutes, { prefix: '/leads' })
   await app.register(settingsRoutes, { prefix: '/settings' })
   await app.register(adminRoutes, { prefix: '/admin' })
+  // Hybrid: Inspirationsmodus (Fahrzeugmodelle + Geschmacksprofil)
+  await app.register(vehicleModelRoutes, { prefix: '/vehicle-models' })
+  await app.register(modelSwipeRoutes, { prefix: '/model-swipes' })
+  await app.register(tasteProfileRoutes, { prefix: '/taste-profile' })
+  await app.register(discoveryRoutes, { prefix: '/discovery' })
 
   return app
 }

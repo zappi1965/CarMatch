@@ -48,6 +48,8 @@ export default function RootLayout() {
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="vehicle/[id]" options={{ title: '' }} />
+        <Stack.Screen name="model/[id]" options={{ title: t('taste.findSimilarListings') }} />
+        <Stack.Screen name="taste" options={{ presentation: 'modal', title: t('taste.title') }} />
         <Stack.Screen name="filters" options={{ presentation: 'modal', title: t('filters.title') }} />
         <Stack.Screen name="location" options={{ presentation: 'modal', title: t('location.title') }} />
         <Stack.Screen name="auth" options={{ presentation: 'modal', title: t('auth.title') }} />

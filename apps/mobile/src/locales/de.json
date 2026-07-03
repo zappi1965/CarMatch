@@ -107,7 +107,61 @@
     "likedBody": "Du magst {{bodyType}}-Modelle.",
     "likedBodyAndPower": "Du likest häufig {{bodyType}}-Modelle mit hoher Leistung.",
     "likedFuel": "Du interessierst dich oft für {{fuelType}}-Fahrzeuge.",
-    "similarTaste": "Dieses Fahrzeug ähnelt Autos, die dir gefallen haben."
+    "similarTaste": "Dieses Fahrzeug ähnelt Autos, die dir gefallen haben.",
+    "similarModels": "Ähnlich zu {{models}}.",
+    "likedSegment": "Passt zu dir, weil du {{segment}} geliked hast.",
+    "powerAndTransmission": "Du speicherst häufig Fahrzeuge mit Automatik und {{hp}}+ PS.",
+    "distanceAndPrice": "Liegt {{km}} km entfernt und passt zu deinem Preisbereich.",
+    "exploration": "Etwas Neues zum Entdecken — sag uns per Swipe, ob es passt."
+  },
+  "mode": {
+    "title": "Wie möchtest du suchen?",
+    "inspiration": {
+      "title": "Autogeschmack entdecken",
+      "description": "Swipe durch Fahrzeugtypen und finde heraus, welche Autos wirklich zu dir passen."
+    },
+    "listings": {
+      "title": "Echte Angebote ansehen",
+      "description": "Swipe durch verfügbare Inserate in deinem Umkreis."
+    },
+    "switchInspiration": "Inspiration",
+    "switchListings": "Angebote"
+  },
+  "taste": {
+    "title": "Dein Autogeschmack",
+    "progress": "{{count}} von {{total}} Swipes für dein Geschmacksprofil",
+    "summaryReady": "Dein Geschmacksprofil ist bereit!",
+    "viewProfile": "Profil ansehen",
+    "learning": "Wir lernen deinen Geschmack noch. Swipe ein paar weitere Autos, damit die Vorschläge besser werden.",
+    "confidence": "Profil-Sicherheit",
+    "findListings": "Passende echte Angebote finden",
+    "topMatches": "Deine Top-Treffer",
+    "modelsSwiped": "{{count}} Fahrzeugtypen bewertet",
+    "insight": {
+      "topSegment": "Dein Stil: {{segment}}",
+      "topMakes": "Deine Marken: {{makes}}",
+      "topBodyTypes": "Deine Karosserien",
+      "highPower": "Du magst Leistung: {{hp}}+ PS",
+      "transmission": "Getriebe-Favorit",
+      "priceRange": "Dein Budget: bis ca. {{max}} €",
+      "dislikedSmall": "Kleine Stadtautos sind nichts für dich"
+    },
+    "moreLikeThis": "Mehr wie dieses Auto",
+    "lessLikeThis": "Weniger davon",
+    "findSimilarListings": "Ähnliche echte Angebote finden",
+    "typicalPrice": "Typischer Gebrauchtpreis",
+    "productionYears": "Baujahre",
+    "powerRange": "Leistung",
+    "strengths": "Typische Stärken",
+    "weaknesses": "Typische Schwächen",
+    "matchReason": "Übereinstimmung",
+    "noListings": "Gerade keine passenden Inserate — wir benachrichtigen dich bei neuen Treffern."
+  },
+  "mockup": {
+    "dreamCandidate": "Traumwagen-Kandidat",
+    "swipeHint": "Wischen für mehr Optionen",
+    "marketPrice": "Marktpreis",
+    "more": "Mehr"
   },
   "garage": {
     "title": "Deine Garage",

@@ -1,8 +1,13 @@
 import type { GeoPoint, VehicleFilters } from '@carmatch/shared'
+import { distanceKm } from '@carmatch/shared'
 import { prisma } from '../db.js'
 import { applySignals, emptyProfile, type UserPreferenceProfile } from '../recommendation/profile.js'
-import { scoreCandidate } from '../recommendation/scoring.js'
-import { explainRecommendation } from '../recommendation/explain.js'
+import {
+  generateRecommendationExplanation,
+  scoreListingHybrid,
+} from '../recommendation/hybridScoring.js'
+import { emptyTasteProfile } from '../recommendation/taste.js'
+import { getTasteProfile } from './tasteProfileService.js'
 import { buildWhere, geoWhere, filterByExactRadius } from './vehicleService.js'
 
 /** Lädt (oder initialisiert) das persistierte Präferenzprofil. */
@@ -109,17 +114,15 @@ export async function discover(opts: DiscoverOptions) {
   const candidates =
     point && radiusKm != null ? filterByExactRadius(candidatesRaw, point, radiusKm) : candidatesRaw
 
-  const profile = await getProfile(userId)
+  // Hybrid: Geschmacksprofil (Inspirationsmodus + Inseratsverhalten)
   const user = await prisma.user.findUnique({ where: { id: userId } })
   const personalization = user?.personalizationEnabled !== false
+  const taste = personalization ? await getTasteProfile(userId) : emptyTasteProfile()
 
   const scored = candidates.map((c) => {
-    const breakdown = scoreCandidate(
-      personalization ? profile : emptyProfile(),
-      {
-        ...c,
-        sponsoredBoost: c.sponsored.reduce((acc, s) => Math.max(acc, s.boost), 0),
-      },
+    const breakdown = scoreListingHybrid(
+      taste,
+      { ...c, sponsoredBoost: c.sponsored.reduce((acc, s) => Math.max(acc, s.boost), 0) },
       { userPoint: point, radiusKm, recentlyShownKeys },
     )
     return { listing: c, breakdown }
@@ -128,6 +131,14 @@ export async function discover(opts: DiscoverOptions) {
   scored.sort((a, b) => b.breakdown.finalTotal - a.breakdown.finalTotal)
   const top = scored.slice(0, limit)
 
+  const explain = (t: (typeof top)[number]) => {
+    const dist =
+      point && t.listing.latitude != null && t.listing.longitude != null
+        ? distanceKm(point, { latitude: t.listing.latitude, longitude: t.listing.longitude })
+        : null
+    return generateRecommendationExplanation(taste, t.listing, t.breakdown, dist)
+  }
+
   // Ergebnisse für Debugging/Erklärbarkeit persistieren
   await prisma.recommendationResult.createMany({
     data: top.map((t) => ({
@@ -135,7 +146,7 @@ export async function discover(opts: DiscoverOptions) {
       listingId: t.listing.id,
       score: t.breakdown.organicTotal,
       sponsoredBoost: t.breakdown.sponsoredBoost,
-      explanationJson: explainRecommendation(profile, t.listing) as object,
+      explanationJson: explain(t) as object,
       scoreBreakdownJson: t.breakdown as unknown as object,
     })),
   })
@@ -143,7 +154,7 @@ export async function discover(opts: DiscoverOptions) {
   return top.map((t) => ({
     listing: { ...t.listing, rawData: undefined, sponsored: undefined },
     distanceKm: 'distanceKm' in t.listing ? (t.listing as { distanceKm?: number }).distanceKm : null,
-    explanation: explainRecommendation(profile, t.listing),
+    explanation: explain(t),
     isSponsored: t.breakdown.sponsoredBoost > 0,
     scoreBreakdown: t.breakdown,
   }))

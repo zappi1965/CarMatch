@@ -128,6 +128,59 @@ export async function adminRoutes(app: FastifyInstance) {
 
   app.get('/stats', async () => ({ ok: true, data: await getStats() }))
 
+  /** Hybrid: Fahrzeugmodelle mit Like/Dislike-Bilanz und Match-Zahlen. */
+  app.get('/vehicle-models', async () => {
+    const models = await prisma.vehicleModel.findMany({
+      include: {
+        _count: { select: { listingMatches: true } },
+        modelSwipes: { where: { undone: false }, select: { action: true } },
+      },
+      orderBy: [{ make: 'asc' }, { model: 'asc' }],
+    })
+    return {
+      ok: true,
+      data: models.map((m) => ({
+        id: m.id,
+        make: m.make,
+        model: m.model,
+        variant: m.variant,
+        segment: m.segment,
+        source: m.source,
+        imagesAreDemo: m.imagesAreDemo,
+        likes: m.modelSwipes.filter((s) => s.action === 'LIKE' || s.action === 'SUPERLIKE').length,
+        dislikes: m.modelSwipes.filter((s) => s.action === 'DISLIKE').length,
+        listingMatches: m._count.listingMatches,
+      })),
+    }
+  })
+
+  app.post('/vehicle-models/rebuild-matches', async () => {
+    const { rebuildModelListingMatches } = await import('../services/modelMatchService.js')
+    return { ok: true, data: await rebuildModelListingMatches() }
+  })
+
+  /** Hybrid: Geschmacksprofile (anonymisiert auf Kennzahlen) + Insights. */
+  app.get('/taste-profiles', async () => {
+    const profiles = await prisma.userTasteProfile.findMany({
+      orderBy: { lastUpdatedAt: 'desc' },
+      take: 50,
+    })
+    return {
+      ok: true,
+      data: profiles.map((p) => ({
+        userId: p.userId,
+        signalCount: p.signalCount,
+        confidence: p.confidence,
+        summaryText: p.summaryText,
+        topMakes: Object.entries((p.preferredMakesJson as Record<string, number>) ?? {})
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 3)
+          .map(([k]) => k),
+        lastUpdatedAt: p.lastUpdatedAt,
+      })),
+    }
+  })
+
   app.get('/feature-flags', async () => ({
     ok: true,
     data: await prisma.featureFlag.findMany(),

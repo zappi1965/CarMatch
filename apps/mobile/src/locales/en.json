@@ -107,7 +107,61 @@
     "likedBody": "You like {{bodyType}} models.",
     "likedBodyAndPower": "You often like powerful {{bodyType}} models.",
     "likedFuel": "You're often interested in {{fuelType}} cars.",
-    "similarTaste": "This car is similar to ones you liked."
+    "similarTaste": "This car is similar to ones you liked.",
+    "similarModels": "Similar to {{models}}.",
+    "likedSegment": "Matches you because you liked {{segment}}.",
+    "powerAndTransmission": "You often save automatic cars with {{hp}}+ hp.",
+    "distanceAndPrice": "It's {{km}} km away and fits your price range.",
+    "exploration": "Something new to discover — tell us with a swipe."
+  },
+  "mode": {
+    "title": "How do you want to search?",
+    "inspiration": {
+      "title": "Discover your car taste",
+      "description": "Swipe through car types and find out which cars really suit you."
+    },
+    "listings": {
+      "title": "Browse real offers",
+      "description": "Swipe through available listings in your area."
+    },
+    "switchInspiration": "Inspiration",
+    "switchListings": "Offers"
+  },
+  "taste": {
+    "title": "Your car taste",
+    "progress": "{{count}} of {{total}} swipes towards your taste profile",
+    "summaryReady": "Your taste profile is ready!",
+    "viewProfile": "View profile",
+    "learning": "We're still learning your taste. Swipe a few more cars to improve suggestions.",
+    "confidence": "Profile confidence",
+    "findListings": "Find matching real offers",
+    "topMatches": "Your top matches",
+    "modelsSwiped": "{{count}} car types rated",
+    "insight": {
+      "topSegment": "Your style: {{segment}}",
+      "topMakes": "Your makes: {{makes}}",
+      "topBodyTypes": "Your body types",
+      "highPower": "You like power: {{hp}}+ hp",
+      "transmission": "Transmission favorite",
+      "priceRange": "Your budget: up to ~€{{max}}",
+      "dislikedSmall": "Small city cars aren't for you"
+    },
+    "moreLikeThis": "More like this car",
+    "lessLikeThis": "Less of this",
+    "findSimilarListings": "Find similar real offers",
+    "typicalPrice": "Typical used price",
+    "productionYears": "Production years",
+    "powerRange": "Power",
+    "strengths": "Typical strengths",
+    "weaknesses": "Typical weaknesses",
+    "matchReason": "Match",
+    "noListings": "No matching listings right now — we'll notify you about new matches."
+  },
+  "mockup": {
+    "dreamCandidate": "Dream car candidate",
+    "swipeHint": "Swipe for more options",
+    "marketPrice": "Market price",
+    "more": "More"
   },
   "garage": {
     "title": "Your garage",

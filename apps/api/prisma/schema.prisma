@@ -34,6 +34,7 @@ model User {
   personalizationEnabled Boolean  @default(true)
   analyticsConsent  Boolean       @default(false)
   scoresEnabled     Json?         // aktivierte Quartett-Scores, null = Default-Set
+  preferredDiscoveryMode String?  // inspiration | listings — zuletzt gewählter Modus
   pushCategories    Json?         // { newMatch: bool, priceDrop: bool, favoriteGone: bool, savedSearch: bool, dealerReply: bool, superMatch: bool }
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
@@ -165,6 +166,10 @@ model VehicleListing {
   country           String       @default("DE")
   isAvailable       Boolean      @default(true)
   qualityScore      Float        @default(0.5) // Vollständigkeit/Qualität des Inserats 0–1
+  // Hybrid: optionale Zuordnung zu einem generellen VehicleModel
+  vehicleModelId       String?
+  modelMatchConfidence Float?
+  modelMatchReason     String?
   rawData           Json?
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt
@@ -178,8 +183,10 @@ model VehicleListing {
   sponsored  SponsoredListing[]
   priceHistory PriceHistory[]
   recommendationResults RecommendationResult[]
+  modelMatches VehicleModelToListingMatch[]
 
   @@unique([provider, providerListingId])
+  @@index([vehicleModelId])
   @@index([latitude, longitude])
   @@index([make, model])
   @@index([price])
@@ -451,4 +458,138 @@ model AnalyticsEvent {
   user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([type, createdAt])
+}
+
+// ─── Hybrid: Inspirationsmodus (Fahrzeugmodelle, keine Inserate) ───────────
+
+/// Generelles Fahrzeugmodell/Baureihe für den Inspirationsmodus.
+/// Strikt getrennt von VehicleListing (echtes Inserat).
+model VehicleModel {
+  id                  String   @id @default(cuid())
+  make                String
+  model               String
+  generation          String?
+  variant             String?
+  productionStartYear Int?
+  productionEndYear   Int?
+  bodyType            BodyType?
+  vehicleSize         String? // small | compact | midsize | large
+  segment             String? // z. B. "Sportlimousine", "Power-Kombi"
+  doors               Int?
+  seats               Int?
+  drivetrain          Drivetrain?
+  fuelTypes           Json? // FuelType[]
+  transmissionTypes   Json? // Transmission[]
+  minPowerHp          Int?
+  maxPowerHp          Int?
+  typicalUsedPriceMin Int?
+  typicalUsedPriceMax Int?
+  imageUrls           Json // string[]
+  imagesAreDemo       Boolean  @default(false)
+  description         String?
+  strengthsJson       Json? // string[] (i18n-Keys oder Texte)
+  weaknessesJson      Json?
+  tagsJson            Json? // string[] z. B. ["performance","alltag"]
+  specsJson           Json? // flexible Zusatzdaten
+  source              String   @default("DEMO") // DEMO | lizenzierte Quelle
+  sourceConfidence    Float    @default(0.5)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  specs         VehicleModelSpecs?
+  modelSwipes   ModelSwipeEvent[]
+  listingMatches VehicleModelToListingMatch[]
+
+  @@unique([make, model, variant])
+  @@index([bodyType, segment])
+}
+
+model VehicleModelSpecs {
+  id              String  @id @default(cuid())
+  vehicleModelId  String  @unique
+  zeroToHundred   Float?
+  topSpeed        Int?
+  weightKg        Int?
+  lengthMm        Int?
+  widthMm         Int?
+  heightMm        Int?
+  trunkVolumeL    Int?
+  consumptionL100 Float?
+  co2GKm          Int?
+  batteryCapacityKwh Float?
+  electricRangeKm Int?
+  chargingSpeedKw Int?
+  confidence      Float   @default(0)
+  source          String?
+  verified        Boolean @default(false)
+
+  vehicleModel VehicleModel @relation(fields: [vehicleModelId], references: [id], onDelete: Cascade)
+}
+
+model ModelSwipeEvent {
+  id             String      @id @default(cuid())
+  userId         String
+  vehicleModelId String
+  action         SwipeAction
+  dwellTimeMs    Int?
+  openedDetails  Boolean     @default(false)
+  openedMore     Boolean     @default(false)
+  undone         Boolean     @default(false)
+  createdAt      DateTime    @default(now())
+
+  vehicleModel VehicleModel @relation(fields: [vehicleModelId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([vehicleModelId, action])
+}
+
+/// Geschmacksprofil aus Inspirationsmodus + Inseratsverhalten (Hybrid).
+model UserTasteProfile {
+  id                       String   @id @default(cuid())
+  userId                   String   @unique
+  preferredMakesJson       Json?
+  preferredModelsJson      Json?
+  preferredSegmentsJson    Json?
+  preferredBodyTypesJson   Json?
+  preferredVehicleSizesJson Json?
+  preferredFuelTypesJson   Json?
+  preferredTransmissionsJson Json?
+  preferredDrivetrainsJson Json?
+  preferredPowerRangeJson  Json? // { targetHp }
+  preferredPriceRangeJson  Json? // { min, max }
+  preferredUseCasesJson    Json? // Tag-Gewichte
+  dislikedPatternsJson     Json?
+  strongPositiveSignalsJson Json?
+  strongNegativeSignalsJson Json?
+  confidence               Float    @default(0)
+  summaryText              String?
+  signalCount              Int      @default(0)
+  lastUpdatedAt            DateTime @default(now())
+}
+
+model TasteProfileInsight {
+  id          String   @id @default(cuid())
+  userId      String
+  insightType String // topSegment | topMake | powerPreference | ...
+  titleKey    String // i18n-Key für die App
+  paramsJson  Json?
+  confidence  Float    @default(0.5)
+  createdAt   DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+/// Zuordnung Modell ↔ echte Inserate ("Ähnliche echte Angebote").
+model VehicleModelToListingMatch {
+  id             String   @id @default(cuid())
+  vehicleModelId String
+  listingId      String
+  matchScore     Float
+  matchReasonJson Json?
+  createdAt      DateTime @default(now())
+
+  vehicleModel VehicleModel   @relation(fields: [vehicleModelId], references: [id], onDelete: Cascade)
+  listing      VehicleListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@unique([vehicleModelId, listingId])
 }

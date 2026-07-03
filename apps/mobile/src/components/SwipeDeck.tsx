@@ -12,24 +12,31 @@ import Animated, {
 import { useTranslation } from 'react-i18next'
 import type { SwipeAction } from '@carmatch/shared'
 import { colors, radius, typography } from '../lib/theme'
-import type { DiscoverItem } from '../lib/types'
-import { VehicleCard } from './VehicleCard'
 
 const SWIPE_X_THRESHOLD = 110
 const SWIPE_UP_THRESHOLD = -130
 
+export interface SwipeDeckHandle {
+  swipe: (action: SwipeAction) => void
+}
+
 /**
- * Swipe-Engine: rechts = Like, links = Dislike, hoch = Super-Like.
- * Verweildauer + "Mehr"-Öffnung werden pro Karte gemessen (Recommendation-Signale).
+ * Generische Swipe-Engine (Inserate UND Fahrzeugmodelle):
+ * rechts = Like, links = Dislike, hoch = Super-Like.
+ * Misst Verweildauer + "Mehr"-Öffnung pro Karte (Recommendation-Signale).
  */
-export function SwipeDeck({
+export function SwipeDeck<T>({
   items,
+  keyFor,
+  renderCard,
   onSwipe,
-  translateExplanation,
+  deckRef,
 }: {
-  items: DiscoverItem[]
-  onSwipe: (item: DiscoverItem, action: SwipeAction, dwellTimeMs: number, openedMore: boolean) => void
-  translateExplanation: (item: DiscoverItem) => string
+  items: T[]
+  keyFor: (item: T) => string
+  renderCard: (item: T, opts: { isTop: boolean; onOpenedMore: () => void }) => React.ReactNode
+  onSwipe: (item: T, action: SwipeAction, dwellTimeMs: number, openedMore: boolean) => void
+  deckRef?: React.MutableRefObject<SwipeDeckHandle | null>
 }) {
   const { t } = useTranslation()
   const { width } = useWindowDimensions()
@@ -40,13 +47,14 @@ export function SwipeDeck({
 
   const top = items[0]
   const next = items[1]
+  const topKey = top ? keyFor(top) : undefined
 
   useEffect(() => {
     shownAt.current = Date.now()
     openedMore.current = false
     tx.value = 0
     ty.value = 0
-  }, [top?.listing.id, tx, ty])
+  }, [topKey, tx, ty])
 
   const commit = useCallback(
     (action: SwipeAction) => {
@@ -58,7 +66,6 @@ export function SwipeDeck({
 
   const flyOut = useCallback(
     (action: SwipeAction) => {
-      'worklet'
       const targetX = action === 'LIKE' ? width * 1.3 : action === 'DISLIKE' ? -width * 1.3 : 0
       const targetY = action === 'SUPERLIKE' ? -900 : ty.value
       tx.value = withTiming(targetX, { duration: 260 })
@@ -67,15 +74,17 @@ export function SwipeDeck({
     [commit, width, tx, ty],
   )
 
+  if (deckRef) deckRef.current = { swipe: flyOut }
+
   const pan = Gesture.Pan()
     .onChange((e) => {
       tx.value += e.changeX
       ty.value += e.changeY
     })
     .onEnd(() => {
-      if (tx.value > SWIPE_X_THRESHOLD) flyOut('LIKE')
-      else if (tx.value < -SWIPE_X_THRESHOLD) flyOut('DISLIKE')
-      else if (ty.value < SWIPE_UP_THRESHOLD) flyOut('SUPERLIKE')
+      if (tx.value > SWIPE_X_THRESHOLD) runOnJS(flyOut)('LIKE')
+      else if (tx.value < -SWIPE_X_THRESHOLD) runOnJS(flyOut)('DISLIKE')
+      else if (ty.value < SWIPE_UP_THRESHOLD) runOnJS(flyOut)('SUPERLIKE')
       else {
         tx.value = withSpring(0, { damping: 16 })
         ty.value = withSpring(0, { damping: 16 })
@@ -103,25 +112,18 @@ export function SwipeDeck({
     <View style={styles.deck}>
       {next ? (
         <Animated.View style={[styles.cardHolder, nextStyle]} pointerEvents="none">
-          <VehicleCard
-            listing={next.listing}
-            distanceKm={next.distanceKm}
-            isSponsored={next.isSponsored}
-          />
+          {renderCard(next, { isTop: false, onOpenedMore: () => {} })}
         </Animated.View>
       ) : null}
 
       <GestureDetector gesture={pan}>
         <Animated.View style={[styles.cardHolder, topStyle]}>
-          <VehicleCard
-            listing={top.listing}
-            distanceKm={top.distanceKm}
-            isSponsored={top.isSponsored}
-            explanationText={translateExplanation(top)}
-            onOpenedMore={() => {
+          {renderCard(top, {
+            isTop: true,
+            onOpenedMore: () => {
               openedMore.current = true
-            }}
-          />
+            },
+          })}
           <Animated.View style={[styles.stamp, styles.stampLike, likeStyle]} pointerEvents="none">
             <Text style={[typography.title, { color: colors.like }]}>{t('swipeLabels.like')}</Text>
           </Animated.View>
@@ -129,7 +131,7 @@ export function SwipeDeck({
             <Text style={[typography.title, { color: colors.dislike }]}>{t('swipeLabels.nope')}</Text>
           </Animated.View>
           <Animated.View style={[styles.stamp, styles.stampDream, dreamStyle]} pointerEvents="none">
-            <Text style={[typography.title, { color: colors.accent }]}>{t('swipeLabels.dream')}</Text>
+            <Text style={[typography.title, { color: colors.info }]}>{t('swipeLabels.dream')}</Text>
           </Animated.View>
         </Animated.View>
       </GestureDetector>
@@ -151,5 +153,5 @@ const styles = StyleSheet.create({
   },
   stampLike: { left: 20, borderColor: colors.like, transform: [{ rotate: '-12deg' }] },
   stampNope: { right: 20, borderColor: colors.dislike, transform: [{ rotate: '12deg' }] },
-  stampDream: { alignSelf: 'center', bottom: 40, top: undefined, borderColor: colors.accent },
+  stampDream: { alignSelf: 'center', bottom: 40, top: undefined, borderColor: colors.info },
 })

@@ -7,11 +7,15 @@ import { UsersView } from './views/Users'
 import { LeadsView } from './views/Leads'
 import { ImportLogsView } from './views/ImportLogs'
 import { FlagsView } from './views/Flags'
+import { VehicleModelsView } from './views/VehicleModels'
+import { TasteProfilesView } from './views/TasteProfiles'
 
 const VIEWS = {
   stats: { label: 'Statistiken', component: StatsView },
   providers: { label: 'Datenquellen', component: ProvidersView },
   listings: { label: 'Inserate', component: ListingsView },
+  models: { label: 'Fahrzeugmodelle', component: VehicleModelsView },
+  tastes: { label: 'Geschmacksprofile', component: TasteProfilesView },
   users: { label: 'Nutzer', component: UsersView },
   leads: { label: 'Leads', component: LeadsView },
   logs: { label: 'Import-Logs', component: ImportLogsView },

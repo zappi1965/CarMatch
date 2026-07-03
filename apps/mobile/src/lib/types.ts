@@ -80,6 +80,65 @@ export interface ListingInsights extends ListingDto {
   isSponsored: boolean
 }
 
+/** Generelles Fahrzeugmodell (Inspirationsmodus) — kein Inserat. */
+export interface VehicleModelDto {
+  id: string
+  make: string
+  model: string
+  generation?: string | null
+  variant?: string | null
+  productionStartYear?: number | null
+  productionEndYear?: number | null
+  bodyType?: string | null
+  vehicleSize?: string | null
+  segment?: string | null
+  doors?: number | null
+  seats?: number | null
+  drivetrain?: string | null
+  fuelTypes?: string[] | null
+  transmissionTypes?: string[] | null
+  minPowerHp?: number | null
+  maxPowerHp?: number | null
+  typicalUsedPriceMin?: number | null
+  typicalUsedPriceMax?: number | null
+  imageUrls: string[]
+  imagesAreDemo: boolean
+  description?: string | null
+  strengthsJson?: string[] | null
+  weaknessesJson?: string[] | null
+  tagsJson?: string[] | null
+  source: string
+  specs?: {
+    zeroToHundred?: number | null
+    topSpeed?: number | null
+    weightKg?: number | null
+    trunkVolumeL?: number | null
+    consumptionL100?: number | null
+    electricRangeKm?: number | null
+  } | null
+}
+
+export interface TasteSummaryDto {
+  summaryText: string | null
+  confidence: number
+  signalCount: number
+  summaryReady: boolean
+  threshold: number
+  topMakes: string[]
+  topSegments: string[]
+  topBodyTypes: string[]
+  targetPowerHp: number | null
+  priceRange: { min: number; max: number } | null
+}
+
+export interface TasteInsightDto {
+  id: string
+  insightType: string
+  titleKey: string
+  paramsJson: Record<string, string | number> | null
+  confidence: number
+}
+
 export const formatPrice = (price: number, currency = 'EUR') =>
   new Intl.NumberFormat('de-DE', { style: 'currency', currency, maximumFractionDigits: 0 }).format(price)
 
