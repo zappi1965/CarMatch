@@ -11,7 +11,7 @@ export async function vehicleModelRoutes(app: FastifyInstance) {
    * bewusst divers gemischt (Cold Start: über Segmente verteilt).
    */
   app.get('/discover', { preHandler: [app.authenticate] }, async (req) => {
-    const q = z.object({ limit: z.coerce.number().max(50).default(15) }).parse(req.query)
+    const q = z.object({ limit: z.coerce.number().max(500).default(15) }).parse(req.query)
     const swiped = await prisma.modelSwipeEvent.findMany({
       where: { userId: req.user.sub, undone: false },
       select: { vehicleModelId: true },

@@ -24,7 +24,8 @@ export default function AuthScreen() {
   const submit = async (mode: 'login' | 'register') => {
     setBusy(true)
     try {
-      const path = mode === 'login' ? '/auth/login' : isGuest ? '/auth/upgrade-guest' : '/auth/register'
+      const path =
+        mode === 'login' ? '/auth/login' : isGuest ? '/auth/upgrade-guest' : '/auth/register'
       const res = await api.post<{ token: string; user: { id: string } }>(path, {
         email: email.trim().toLowerCase(),
         password,
@@ -64,8 +65,17 @@ export default function AuthScreen() {
         onChangeText={setPassword}
       />
 
-      <CTAButton label={t('auth.login')} onPress={() => void submit('login')} disabled={busy || !email || password.length < 8} />
-      <CTAButton label={t('auth.register')} variant="secondary" onPress={() => void submit('register')} disabled={busy || !email || password.length < 8} />
+      <CTAButton
+        label={t('auth.login')}
+        onPress={() => void submit('login')}
+        disabled={busy || !email || password.length < 8}
+      />
+      <CTAButton
+        label={t('auth.register')}
+        variant="secondary"
+        onPress={() => void submit('register')}
+        disabled={busy || !email || password.length < 8}
+      />
 
       <View style={styles.divider} />
 

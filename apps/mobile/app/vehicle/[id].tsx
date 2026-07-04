@@ -23,7 +23,10 @@ export default function VehicleDetailScreen() {
   useEffect(() => {
     if (!id) return
     const q = buildQuery({ lat: location.latitude, lon: location.longitude })
-    api.get<ListingInsights>(`/vehicles/${id}${q}`).then(setData).catch(() => {})
+    api
+      .get<ListingInsights>(`/vehicles/${id}${q}`)
+      .then(setData)
+      .catch(() => {})
   }, [id, location])
 
   if (!data) return <LoadingState label={t('common.loading')} />
@@ -39,10 +42,17 @@ export default function VehicleDetailScreen() {
   }
 
   const priceTone =
-    data.priceAssessment.verdict === 'GOOD_DEAL' ? 'gold' : data.priceAssessment.verdict === 'EXPENSIVE' ? 'warn' : 'default'
+    data.priceAssessment.verdict === 'GOOD_DEAL'
+      ? 'gold'
+      : data.priceAssessment.verdict === 'EXPENSIVE'
+        ? 'warn'
+        : 'default'
 
   return (
-    <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={{ paddingBottom: spacing(10) }}>
+    <ScrollView
+      style={{ backgroundColor: colors.bg }}
+      contentContainerStyle={{ paddingBottom: spacing(10) }}
+    >
       <Image source={{ uri: data.images[0] }} style={styles.hero} />
       <View style={{ padding: spacing(4), gap: spacing(4) }}>
         <View>
@@ -55,11 +65,21 @@ export default function VehicleDetailScreen() {
           <Text style={[typography.display, { color: colors.text }]}>
             {data.model} {data.variant ?? ''}
           </Text>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing(3), marginTop: spacing(2) }}>
-            <Text style={[typography.price, { color: colors.gold }]}>{formatPrice(data.price, data.currency)}</Text>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: spacing(3),
+              marginTop: spacing(2),
+            }}
+          >
+            <Text style={[typography.price, { color: colors.gold }]}>
+              {formatPrice(data.price, data.currency)}
+            </Text>
             <Badge label={t(`price.${data.priceAssessment.verdict}`)} tone={priceTone} />
           </View>
-          {data.priceAssessment.verdict !== 'UNKNOWN' && data.priceAssessment.deltaPercent != null ? (
+          {data.priceAssessment.verdict !== 'UNKNOWN' &&
+          data.priceAssessment.deltaPercent != null ? (
             <Text style={[typography.badge, { color: colors.textFaint, marginTop: spacing(1) }]}>
               {t(data.priceAssessment.deltaPercent <= 0 ? 'price.deltaBelow' : 'price.deltaAbove', {
                 percent: Math.abs(data.priceAssessment.deltaPercent),
@@ -69,12 +89,84 @@ export default function VehicleDetailScreen() {
           ) : null}
         </View>
 
+        {data.monthlyCost ? (
+          <View style={styles.box}>
+            <Text style={[typography.label, { color: colors.gold, marginBottom: spacing(2) }]}>
+              Was kostet mich das Auto wirklich?
+            </Text>
+            <Text style={[typography.display, { color: colors.gold }]}>
+              ca. {data.monthlyCost.total} €/Monat
+            </Text>
+            <Row label="Wertverlust" value={`${data.monthlyCost.depreciation} €/Monat`} />
+            <Row label="Versicherung" value={`${data.monthlyCost.insurance} €/Monat`} />
+            <Row label="Kfz-Steuer" value={`${data.monthlyCost.tax} €/Monat`} />
+            <Row label="Sprit/Strom" value={`${data.monthlyCost.fuelOrEnergy} €/Monat`} />
+            <Row label="Wartung" value={`${data.monthlyCost.maintenance} €/Monat`} />
+            <Row label="Kapitalbindung" value={`${data.monthlyCost.financing} €/Monat`} />
+          </View>
+        ) : null}
+
+        {data.marketTiming ? (
+          <View style={styles.box}>
+            <Text style={[typography.label, { color: colors.textMuted, marginBottom: spacing(2) }]}>
+              Kauf-Timing
+            </Text>
+            <Text style={[typography.body, { color: colors.text }]}>
+              {data.marketTiming.waitAdvice}
+            </Text>
+            {data.marketTiming.currentVsYearAveragePercent != null ? (
+              <Row
+                label="Jahresschnitt"
+                value={`${data.marketTiming.currentVsYearAveragePercent}%`}
+              />
+            ) : null}
+            <Row label="Preistrend" value={data.marketTiming.trendDirection} />
+            {data.marketTiming.seasonalHint ? (
+              <Text style={[typography.badge, { color: colors.textMuted, marginTop: spacing(2) }]}>
+                {data.marketTiming.seasonalHint}
+              </Text>
+            ) : null}
+          </View>
+        ) : null}
+
+        {data.modelKnowledge ? (
+          <View style={styles.box}>
+            <Text style={[typography.label, { color: colors.textMuted, marginBottom: spacing(2) }]}>
+              Modellwissen
+            </Text>
+            <Text style={[typography.body, { color: colors.text, marginBottom: spacing(2) }]}>
+              {data.modelKnowledge.summary}
+            </Text>
+            {(data.modelKnowledge.commonIssuesJson ?? []).slice(0, 4).map((issue) => (
+              <Text key={issue} style={[typography.body, { color: colors.warn }]}>
+                ⚠︎ {issue}
+              </Text>
+            ))}
+            {data.modelKnowledge.buyingAdvice ? (
+              <Text style={[typography.badge, { color: colors.gold, marginTop: spacing(2) }]}>
+                {data.modelKnowledge.buyingAdvice}
+              </Text>
+            ) : null}
+          </View>
+        ) : null}
+
         {/* Kaufhilfe: Risiko-Hinweise */}
         {data.riskFlags.length > 0 ? (
           <View style={styles.box}>
-            <Text style={[typography.label, { color: colors.warn, marginBottom: spacing(2) }]}>{t('risks.title')}</Text>
+            <Text style={[typography.label, { color: colors.warn, marginBottom: spacing(2) }]}>
+              {t('risks.title')}
+            </Text>
             {data.riskFlags.map((f) => (
-              <Text key={f.key} style={[typography.body, { color: f.severity === 'WARN' ? colors.warn : colors.textMuted, marginBottom: spacing(1) }]}>
+              <Text
+                key={f.key}
+                style={[
+                  typography.body,
+                  {
+                    color: f.severity === 'WARN' ? colors.warn : colors.textMuted,
+                    marginBottom: spacing(1),
+                  },
+                ]}
+              >
                 {f.severity === 'WARN' ? '⚠︎ ' : 'ℹ︎ '}
                 {t(`risks.${f.key}`)}
               </Text>
@@ -102,19 +194,45 @@ export default function VehicleDetailScreen() {
 
         {/* Kerndaten */}
         <View style={styles.box}>
-          <Row label={t('card.year')} value={data.year != null ? String(data.year) : t('card.unknown')} />
+          <Row
+            label={t('card.year')}
+            value={data.year != null ? String(data.year) : t('card.unknown')}
+          />
           <Row label={t('card.mileage')} value={formatKm(data.mileage)} />
-          <Row label={t('card.power')} value={data.powerHp != null ? `${data.powerHp} ${t('common.hp')}` : t('card.unknown')} />
-          <Row label={t('card.fuel')} value={data.fuelType ? t(`filters.fuelValues.${data.fuelType}`) : t('card.unknown')} />
-          <Row label={t('card.transmission')} value={data.transmission ? t(`filters.transmissionValues.${data.transmission}`) : t('card.unknown')} />
-          <Row label={t('card.seller')} value={data.sellerType === 'DEALER' ? t('card.dealer') : t('card.private')} />
-          {data.distanceKm != null ? <Row label={t('location.title')} value={`${data.city ?? ''} · ${t('card.distance', { km: data.distanceKm })}`} /> : null}
+          <Row
+            label={t('card.power')}
+            value={data.powerHp != null ? `${data.powerHp} ${t('common.hp')}` : t('card.unknown')}
+          />
+          <Row
+            label={t('card.fuel')}
+            value={data.fuelType ? t(`filters.fuelValues.${data.fuelType}`) : t('card.unknown')}
+          />
+          <Row
+            label={t('card.transmission')}
+            value={
+              data.transmission
+                ? t(`filters.transmissionValues.${data.transmission}`)
+                : t('card.unknown')
+            }
+          />
+          <Row
+            label={t('card.seller')}
+            value={data.sellerType === 'DEALER' ? t('card.dealer') : t('card.private')}
+          />
+          {data.distanceKm != null ? (
+            <Row
+              label={t('location.title')}
+              value={`${data.city ?? ''} · ${t('card.distance', { km: data.distanceKm })}`}
+            />
+          ) : null}
         </View>
 
         {/* Lead / Kontakt */}
         {!leadSent ? (
           <View style={styles.box}>
-            <Text style={[typography.label, { color: colors.textMuted, marginBottom: spacing(2) }]}>{t('lead.title')}</Text>
+            <Text style={[typography.label, { color: colors.textMuted, marginBottom: spacing(2) }]}>
+              {t('lead.title')}
+            </Text>
             <TextInput
               style={styles.input}
               placeholder={t('lead.defaultMessage')}
@@ -123,17 +241,31 @@ export default function VehicleDetailScreen() {
               onChangeText={setLeadMessage}
               multiline
             />
-            <Text style={[typography.badge, { color: colors.textFaint, marginVertical: spacing(2) }]}>
+            <Text
+              style={[typography.badge, { color: colors.textFaint, marginVertical: spacing(2) }]}
+            >
               {t('lead.attribution')}
             </Text>
             <View style={{ gap: spacing(2) }}>
               <CTAButton label={t('actions.contact')} onPress={() => sendLead('/leads/contact')} />
-              <CTAButton label={t('actions.testDrive')} variant="secondary" onPress={() => sendLead('/leads/test-drive')} />
+              <CTAButton
+                label={t('actions.testDrive')}
+                variant="secondary"
+                onPress={() => sendLead('/leads/test-drive')}
+              />
               {data.financingAvailable ? (
-                <CTAButton label={t('actions.checkFinance')} variant="secondary" onPress={() => sendLead('/leads/finance')} />
+                <CTAButton
+                  label={t('actions.checkFinance')}
+                  variant="secondary"
+                  onPress={() => sendLead('/leads/finance')}
+                />
               ) : null}
               {data.sourceUrl ? (
-                <CTAButton label={t('actions.toListing')} variant="ghost" onPress={() => void Linking.openURL(data.sourceUrl!)} />
+                <CTAButton
+                  label={t('actions.toListing')}
+                  variant="ghost"
+                  onPress={() => void Linking.openURL(data.sourceUrl!)}
+                />
               ) : null}
             </View>
           </View>

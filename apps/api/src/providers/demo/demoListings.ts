@@ -303,4 +303,44 @@ export const demoListings: Demo[] = [
     images: img('Suzuki Swift Sport'), sellerType: 'DEALER', dealerName: 'Suzuki Wismar',
     latitude: 53.8880, longitude: 11.4650, postalCode: '23970', city: 'Wismar', country: 'DE',
   },
+
+  {
+    providerListingId: 'demo-0101', make: 'Porsche', model: 'Panamera', variant: 'Turbo S E-Hybrid', title: 'Porsche Panamera Turbo S E-Hybrid',
+    price: 132900, year: 2022, firstRegistration: '2022-07', mileage: 23800, powerKw: 515, powerHp: 700, fuelType: 'PLUGIN_HYBRID', transmission: 'AUTOMATIC', drivetrain: 'AWD',
+    bodyType: 'SEDAN', doors: 5, seats: 4, color: 'Vulkangrau', interior: 'Leder Club', features: ['Sport Chrono', 'Keramikbremse', 'Matrix-LED', 'Luftfahrwerk'], consumptionL100: 3.2, co2GKm: 73, displacementCcm: 3996, previousOwners: 1, accidentFree: true, fullServiceHistory: true, warranty: true, financingAvailable: true,
+    images: img('Porsche Panamera Turbo S E-Hybrid'), sellerType: 'DEALER', dealerName: 'Porsche Zentrum Hamburg', latitude: 53.55, longitude: 9.99, postalCode: '20095', city: 'Hamburg', country: 'DE',
+    rawData: { imageSource: 'DEMO Platzhalter via placehold.co', imageLicense: 'Demo placeholder' },
+  },
+  {
+    providerListingId: 'demo-0102', make: 'Porsche', model: '911', variant: 'Carrera 4S', title: 'Porsche 911 Carrera 4S',
+    price: 124900, year: 2021, firstRegistration: '2021-05', mileage: 18400, powerKw: 331, powerHp: 450, fuelType: 'PETROL', transmission: 'AUTOMATIC', drivetrain: 'AWD', bodyType: 'COUPE', doors: 2, seats: 4, color: 'Kreide', features: ['Sport Chrono', 'PASM', 'Bose'], consumptionL100: 9.7, co2GKm: 220, displacementCcm: 2981, previousOwners: 1, accidentFree: true, fullServiceHistory: true, warranty: true, financingAvailable: true, images: img('Porsche 911 Carrera 4S'), sellerType: 'DEALER', dealerName: 'Porsche Zentrum Lübeck', latitude: 53.87, longitude: 10.69, postalCode: '23552', city: 'Lübeck', country: 'DE', rawData: { imageSource: 'DEMO Platzhalter via placehold.co' },
+  },
+  {
+    providerListingId: 'demo-0103', make: 'BMW', model: 'M5', variant: 'CS', title: 'BMW M5 CS',
+    price: 154900, year: 2022, firstRegistration: '2022-02', mileage: 16200, powerKw: 467, powerHp: 635, fuelType: 'PETROL', transmission: 'AUTOMATIC', drivetrain: 'AWD', bodyType: 'SEDAN', doors: 4, seats: 4, color: 'Frozen Deep Green', interior: 'Carbon-Schalen', features: ['Carbon-Keramik', 'M Driver Package', 'Laserlicht'], consumptionL100: 11.3, co2GKm: 258, displacementCcm: 4395, previousOwners: 1, accidentFree: true, fullServiceHistory: true, warranty: true, financingAvailable: true, images: img('BMW M5 CS'), sellerType: 'DEALER', dealerName: 'BMW M Spezialist Hamburg', latitude: 53.56, longitude: 10.01, postalCode: '22083', city: 'Hamburg', country: 'DE', rawData: { imageSource: 'DEMO Platzhalter via placehold.co' },
+  },
+  {
+    providerListingId: 'demo-0104', make: 'BMW', model: '330d', variant: 'Coupé E92', title: 'BMW 330d Coupé E92',
+    price: 18900, year: 2011, firstRegistration: '2011-04', mileage: 148000, powerKw: 180, powerHp: 245, fuelType: 'DIESEL', transmission: 'AUTOMATIC', drivetrain: 'RWD', bodyType: 'COUPE', doors: 2, seats: 4, color: 'Le Mans Blau', features: ['M-Paket', 'Navi Professional', 'Xenon'], consumptionL100: 6.2, co2GKm: 164, displacementCcm: 2993, previousOwners: 3, accidentFree: true, fullServiceHistory: false, warranty: false, financingAvailable: false, images: img('BMW 330d Coupe E92'), sellerType: 'PRIVATE', latitude: 53.63, longitude: 11.41, postalCode: '19053', city: 'Schwerin', country: 'DE', rawData: { imageSource: 'DEMO Platzhalter via placehold.co' },
+  },
+  {
+    providerListingId: 'demo-0105', make: 'Audi', model: 'RS5', variant: 'B9 Coupé', title: 'Audi RS5 Coupé B9',
+    price: 57900, year: 2019, firstRegistration: '2019-09', mileage: 58500, powerKw: 331, powerHp: 450, fuelType: 'PETROL', transmission: 'AUTOMATIC', drivetrain: 'AWD', bodyType: 'COUPE', doors: 2, seats: 4, color: 'Nardograu', features: ['RS Sportabgasanlage', 'Virtual Cockpit', 'Matrix-LED'], consumptionL100: 8.7, co2GKm: 197, displacementCcm: 2894, previousOwners: 2, accidentFree: true, fullServiceHistory: true, warranty: true, financingAvailable: true, images: img('Audi RS5 B9 Coupe'), sellerType: 'DEALER', dealerName: 'Audi Sport Partner Berlin', latitude: 52.52, longitude: 13.40, postalCode: '10115', city: 'Berlin', country: 'DE', rawData: { imageSource: 'DEMO Platzhalter via placehold.co' },
+  },
+  {
+    providerListingId: 'demo-0106', make: 'Audi', model: 'A5', variant: '3.0 TDI quattro', title: 'Audi A5 3.0 TDI quattro',
+    price: 22400, year: 2015, firstRegistration: '2015-06', mileage: 124000, powerKw: 180, powerHp: 245, fuelType: 'DIESEL', transmission: 'AUTOMATIC', drivetrain: 'AWD', bodyType: 'COUPE', doors: 2, seats: 4, color: 'Daytonagrau', features: ['S line', 'B&O', 'Xenon Plus'], consumptionL100: 5.9, co2GKm: 155, displacementCcm: 2967, previousOwners: 2, accidentFree: true, fullServiceHistory: true, warranty: false, financingAvailable: true, images: img('Audi A5 3.0 TDI'), sellerType: 'DEALER', dealerName: 'Audi Partner Rostock', latitude: 54.09, longitude: 12.14, postalCode: '18055', city: 'Rostock', country: 'DE', rawData: { imageSource: 'DEMO Platzhalter via placehold.co' },
+  },
+  {
+    providerListingId: 'demo-0107', make: 'Mercedes-Benz', model: 'C 63 AMG', variant: 'S W205', title: 'Mercedes-AMG C 63 S W205',
+    price: 61900, year: 2018, firstRegistration: '2018-08', mileage: 67200, powerKw: 375, powerHp: 510, fuelType: 'PETROL', transmission: 'AUTOMATIC', drivetrain: 'RWD', bodyType: 'SEDAN', doors: 4, seats: 5, color: 'Selenitgrau', features: ['Performance Abgasanlage', 'AMG Driver Package', 'Burmester'], consumptionL100: 10.8, co2GKm: 244, displacementCcm: 3982, previousOwners: 2, accidentFree: true, fullServiceHistory: true, warranty: true, financingAvailable: true, images: img('Mercedes AMG C63 S W205'), sellerType: 'DEALER', dealerName: 'AMG Performance Center Kiel', latitude: 54.32, longitude: 10.12, postalCode: '24103', city: 'Kiel', country: 'DE', rawData: { imageSource: 'DEMO Platzhalter via placehold.co' },
+  },
+  {
+    providerListingId: 'demo-0108', make: 'Volvo', model: 'XC60', variant: 'B5 AWD Inscription', title: 'Volvo XC60 B5 AWD',
+    price: 42900, year: 2022, firstRegistration: '2022-11', mileage: 35900, powerKw: 184, powerHp: 250, fuelType: 'HYBRID', transmission: 'AUTOMATIC', drivetrain: 'AWD', bodyType: 'SUV', doors: 5, seats: 5, color: 'Denim Blue', features: ['Pilot Assist', 'Bowers & Wilkins', 'AHK'], consumptionL100: 7.2, co2GKm: 164, displacementCcm: 1969, previousOwners: 1, accidentFree: true, fullServiceHistory: true, warranty: true, financingAvailable: true, images: img('Volvo XC60 B5 AWD'), sellerType: 'DEALER', dealerName: 'Volvo Zentrum Schwerin', latitude: 53.63, longitude: 11.40, postalCode: '19053', city: 'Schwerin', country: 'DE', rawData: { imageSource: 'DEMO Platzhalter via placehold.co' },
+  },
+  {
+    providerListingId: 'demo-0109', make: 'Kia', model: 'EV6', variant: 'GT-Line AWD', title: 'Kia EV6 GT-Line AWD',
+    price: 44900, year: 2023, firstRegistration: '2023-03', mileage: 18800, powerKw: 239, powerHp: 325, fuelType: 'ELECTRIC', transmission: 'AUTOMATIC', drivetrain: 'AWD', bodyType: 'SUV', doors: 5, seats: 5, color: 'Moonscape Matt', features: ['800V-Laden', 'Wärmepumpe', 'HUD'], consumptionL100: 0, co2GKm: 0, previousOwners: 1, accidentFree: true, fullServiceHistory: true, warranty: true, financingAvailable: true, images: img('Kia EV6 GT-Line AWD'), sellerType: 'DEALER', dealerName: 'Kia Autohaus Stralsund', latitude: 54.31, longitude: 13.08, postalCode: '18439', city: 'Stralsund', country: 'DE', rawData: { imageSource: 'DEMO Platzhalter via placehold.co' },
+  },
 ]

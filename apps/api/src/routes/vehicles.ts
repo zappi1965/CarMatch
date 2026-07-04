@@ -160,7 +160,7 @@ export async function vehicleRoutes(app: FastifyInstance) {
     const { id } = z.object({ id: z.string() }).parse(req.params)
     const q = locationSchema.parse(req.query)
     const point = await resolvePoint(q)
-    const listing = await getListingWithInsights(id, point)
+    const listing = await getListingWithInsights(id, point, req.user?.sub)
     if (!listing) return reply.code(404).send({ ok: false, error: 'NOT_FOUND' })
     await track('detail_open', undefined, { listingId: id })
     return { ok: true, data: listing }

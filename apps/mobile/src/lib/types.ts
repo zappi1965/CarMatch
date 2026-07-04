@@ -3,6 +3,8 @@ import type {
   RecommendationExplanation,
   RiskFlag,
   VehicleScore,
+  MonthlyOwnershipCostBreakdown,
+  MarketTimingInsight,
 } from '@carmatch/shared'
 
 /** Inserat, wie es die API liefert (DB-Form, ohne rawData). */
@@ -50,7 +52,10 @@ export interface ListingDto {
   createdAt: string
   specs?: SpecsDto | null
   priceHistory?: Array<{ price: number; recordedAt: string }>
+  monthlyCost?: MonthlyOwnershipCostBreakdown
 }
+
+export type MonthlyCostDto = MonthlyOwnershipCostBreakdown
 
 export interface SpecsDto {
   zeroToHundred?: number | null
@@ -69,6 +74,20 @@ export interface DiscoverItem {
   distanceKm?: number | null
   explanation: RecommendationExplanation
   isSponsored: boolean
+  monthlyCost?: MonthlyOwnershipCostBreakdown
+  marketTiming?: MarketTimingInsight
+  modelKnowledge?: {
+    summary: string
+    commonIssuesJson?: string[]
+    maintenanceNotesJson?: string[]
+    ownerSentiment?: string
+    reliabilityScore?: number
+    comfortScore?: number
+    sportinessScore?: number
+    familyScore?: number
+    buyingAdvice?: string
+    sourcesJson?: Array<{ label: string; url?: string; license?: string }>
+  } | null
 }
 
 export interface ListingInsights extends ListingDto {
@@ -78,6 +97,20 @@ export interface ListingInsights extends ListingDto {
   scores: VehicleScore[]
   attribution?: { displayName: string; attributionText: string } | null
   isSponsored: boolean
+  monthlyCost?: MonthlyOwnershipCostBreakdown
+  marketTiming?: MarketTimingInsight
+  modelKnowledge?: {
+    summary: string
+    commonIssuesJson?: string[]
+    maintenanceNotesJson?: string[]
+    ownerSentiment?: string
+    reliabilityScore?: number
+    comfortScore?: number
+    sportinessScore?: number
+    familyScore?: number
+    buyingAdvice?: string
+    sourcesJson?: Array<{ label: string; url?: string; license?: string }>
+  } | null
 }
 
 /** Generelles Fahrzeugmodell (Inspirationsmodus) — kein Inserat. */
@@ -140,7 +173,9 @@ export interface TasteInsightDto {
 }
 
 export const formatPrice = (price: number, currency = 'EUR') =>
-  new Intl.NumberFormat('de-DE', { style: 'currency', currency, maximumFractionDigits: 0 }).format(price)
+  new Intl.NumberFormat('de-DE', { style: 'currency', currency, maximumFractionDigits: 0 }).format(
+    price,
+  )
 
 export const formatKm = (km?: number | null) =>
   km == null ? '–' : `${new Intl.NumberFormat('de-DE').format(km)} km`

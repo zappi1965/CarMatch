@@ -12,18 +12,25 @@ const FEATURES = ['superlikes', 'alerts', 'searches', 'market', 'compare'] as co
 export default function PremiumScreen() {
   const { t } = useTranslation()
   return (
-    <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={{ padding: spacing(5), gap: spacing(4) }}>
+    <ScrollView
+      style={{ backgroundColor: colors.bg }}
+      contentContainerStyle={{ padding: spacing(5), gap: spacing(4) }}
+    >
       <Text style={[typography.body, { color: colors.textMuted }]}>{t('premium.subtitle')}</Text>
       <View style={styles.box}>
         {FEATURES.map((f) => (
           <View key={f} style={styles.row}>
             <Text style={{ color: colors.gold, marginRight: spacing(3) }}>◆</Text>
-            <Text style={[typography.body, { color: colors.text }]}>{t(`premium.features.${f}`)}</Text>
+            <Text style={[typography.body, { color: colors.text }]}>
+              {t(`premium.features.${f}`)}
+            </Text>
           </View>
         ))}
       </View>
       <View style={styles.notice}>
-        <Text style={[typography.body, { color: colors.textMuted }]}>{t('premium.notAvailable')}</Text>
+        <Text style={[typography.body, { color: colors.textMuted }]}>
+          {t('premium.notAvailable')}
+        </Text>
       </View>
     </ScrollView>
   )

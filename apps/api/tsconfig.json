@@ -2,6 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true,
+    "noImplicitAny": false,
     "baseUrl": ".",
     "paths": {
       "@carmatch/shared": ["../../packages/shared/src/index.ts"]

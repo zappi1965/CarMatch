@@ -21,7 +21,10 @@ export default function GarageScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      api.get<FavoriteDto[]>('/favorites').then(setFavorites).catch(() => setFavorites([]))
+      api
+        .get<FavoriteDto[]>('/favorites')
+        .then(setFavorites)
+        .catch(() => setFavorites([]))
     }, []),
   )
 
@@ -51,28 +54,38 @@ export default function GarageScreen() {
           >
             <Image source={{ uri: item.listing.images[0] }} style={styles.thumb} />
             <View style={{ flex: 1, padding: spacing(3) }}>
-              <Text style={[typography.label, { color: colors.textMuted }]}>{item.listing.make}</Text>
-              <Text style={[typography.body, { color: colors.text, fontWeight: '700' }]} numberOfLines={1}>
+              <Text style={[typography.label, { color: colors.textMuted }]}>
+                {item.listing.make}
+              </Text>
+              <Text
+                style={[typography.body, { color: colors.text, fontWeight: '700' }]}
+                numberOfLines={1}
+              >
                 {item.listing.model} {item.listing.variant ?? ''}
               </Text>
-              <Text style={[typography.body, { color: colors.gold, fontWeight: '700', marginTop: 2 }]}>
+              <Text
+                style={[typography.body, { color: colors.gold, fontWeight: '700', marginTop: 2 }]}
+              >
                 {formatPrice(item.listing.price, item.listing.currency)}
               </Text>
               <Text style={[typography.badge, { color: colors.textFaint, marginTop: 2 }]}>
-                {item.listing.year ?? '–'} · {formatKm(item.listing.mileage)} · {item.listing.city ?? ''}
+                {item.listing.year ?? '–'} · {formatKm(item.listing.mileage)} ·{' '}
+                {item.listing.city ?? ''}
               </Text>
               <View style={{ flexDirection: 'row', gap: spacing(1.5), marginTop: spacing(2) }}>
                 {dropped && <Badge label={t('garage.priceDropped')} tone="gold" />}
                 {!item.listing.isAvailable && <Badge label={t('push.favoriteGone')} tone="warn" />}
-                {item.listing.imagesAreDemo && <Badge label={t('discover.demoBadge')} tone="warn" />}
+                {item.listing.imagesAreDemo && (
+                  <Badge label={t('discover.demoBadge')} tone="warn" />
+                )}
               </View>
             </View>
             <Pressable
               hitSlop={10}
               onPress={() => {
-                void api.delete(`/favorites/${item.id}`).then(() =>
-                  setFavorites((prev) => prev?.filter((f) => f.id !== item.id) ?? null),
-                )
+                void api
+                  .delete(`/favorites/${item.id}`)
+                  .then(() => setFavorites((prev) => prev?.filter((f) => f.id !== item.id) ?? null))
               }}
               style={{ padding: spacing(3) }}
             >

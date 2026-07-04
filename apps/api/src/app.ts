@@ -17,6 +17,14 @@ import { vehicleModelRoutes } from './routes/vehicleModels.js'
 import { modelSwipeRoutes } from './routes/modelSwipes.js'
 import { tasteProfileRoutes } from './routes/tasteProfile.js'
 import { discoveryRoutes } from './routes/discovery.js'
+import { duelRoutes } from './routes/duels.js'
+import { budgetRoutes } from './routes/budget.js'
+import { marketTimingRoutes } from './routes/marketTiming.js'
+import { sharedSearchRoutesV2 } from './routes/sharedSearches.js'
+import { sellerRoutes } from './routes/seller.js'
+import { ownedGarageRoutes } from './routes/ownedGarage.js'
+import { evCheckRoutes } from './routes/evCheck.js'
+import { buyingAssistantRoutes } from './routes/buyingAssistant.js'
 
 export async function buildApp() {
   const app = Fastify({ logger: config.NODE_ENV !== 'test' })
@@ -51,6 +59,15 @@ export async function buildApp() {
   await app.register(modelSwipeRoutes, { prefix: '/model-swipes' })
   await app.register(tasteProfileRoutes, { prefix: '/taste-profile' })
   await app.register(discoveryRoutes, { prefix: '/discovery' })
+  await app.register(duelRoutes, { prefix: '/duels' })
+  await app.register(budgetRoutes, { prefix: '/budget' })
+  await app.register(marketTimingRoutes, { prefix: '/market-timing' })
+  await app.register(sharedSearchRoutesV2, { prefix: '/shared-searches' })
+  await app.register(sharedSearchRoutesV2, { prefix: '/shared-searches-v2' })
+  await app.register(sellerRoutes, { prefix: '/seller' })
+  await app.register(ownedGarageRoutes, { prefix: '/owned-garage' })
+  await app.register(evCheckRoutes, { prefix: '/ev-check' })
+  await app.register(buyingAssistantRoutes, { prefix: '/buying-assistant' })
 
   return app
 }

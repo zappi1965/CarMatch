@@ -36,6 +36,7 @@ model User {
   scoresEnabled     Json?         // aktivierte Quartett-Scores, null = Default-Set
   preferredDiscoveryMode String?  // inspiration | listings — zuletzt gewählter Modus
   pushCategories    Json?         // { newMatch: bool, priceDrop: bool, favoriteGone: bool, savedSearch: bool, dealerReply: bool, superMatch: bool }
+  monthlyBudgetEur  Int?          // Kaufhilfe: bevorzugtes Monatsbudget statt nur Kaufpreis
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
 
@@ -49,6 +50,12 @@ model User {
   subscriptions     Subscription[]
   pushTokens        PushToken[]
   analyticsEvents   AnalyticsEvent[]
+  duelSignals       DuelSignal[]
+  sharedMemberships SharedSearchMember[]
+  sharedSignals     SharedVehicleSignal[]
+  sellerLeads       SellerLead[]
+  ownedVehicles     OwnedVehicle[]
+  evLifestyleChecks EvLifestyleCheck[]
 }
 
 model UserLocation {
@@ -182,6 +189,10 @@ model VehicleListing {
   leads      Lead[]
   sponsored  SponsoredListing[]
   priceHistory PriceHistory[]
+  modelPriceHistory VehiclePriceHistory[]
+  duelWins   DuelSignal[] @relation("DuelWinner")
+  duelLosses DuelSignal[] @relation("DuelLoser")
+  sharedSignals SharedVehicleSignal[]
   recommendationResults RecommendationResult[]
   modelMatches VehicleModelToListingMatch[]
 
@@ -415,6 +426,189 @@ model SponsoredListing {
   dealer  Dealer         @relation(fields: [dealerId], references: [id], onDelete: Cascade)
 }
 
+
+
+// ─── Kaufhilfe-Erweiterungen ───────────────────────────────────────────────
+
+model DuelSignal {
+  id              String   @id @default(cuid())
+  userId          String
+  winnerListingId String
+  loserListingId  String
+  signalType      String   @default("duel_win") // duel_win | duel_loss Paarvergleich
+  weight          Float    @default(3.5)
+  createdAt       DateTime @default(now())
+
+  user   User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  winner VehicleListing @relation("DuelWinner", fields: [winnerListingId], references: [id], onDelete: Cascade)
+  loser  VehicleListing @relation("DuelLoser", fields: [loserListingId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([winnerListingId])
+  @@index([loserListingId])
+}
+
+model VehiclePriceHistory {
+  id        String   @id @default(cuid())
+  listingId String?
+  modelId   String?
+  price     Int
+  date      DateTime @default(now())
+  source    String   @default("DEMO")
+  mileage   Int?
+  location  String?
+
+  listing VehicleListing? @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  model   VehicleModel?   @relation(fields: [modelId], references: [id], onDelete: Cascade)
+
+  @@index([listingId, date])
+  @@index([modelId, date])
+}
+
+model VehicleModelPriceStats {
+  id                          String   @id @default(cuid())
+  modelId                     String   @unique
+  averagePrice30d             Int?
+  averagePrice90d             Int?
+  averagePrice365d            Int?
+  currentVsYearAveragePercent Float?
+  trendDirection              String   @default("stable") // falling | stable | rising
+  seasonalHint                String?
+  bestBuyingMonthsJson        Json?
+  lastCalculatedAt            DateTime @default(now())
+
+  model VehicleModel @relation(fields: [modelId], references: [id], onDelete: Cascade)
+}
+
+model SharedSearch {
+  id          String   @id @default(cuid())
+  name        String
+  ownerUserId String
+  inviteCode  String   @unique
+  createdAt   DateTime @default(now())
+
+  members SharedSearchMember[]
+  signals SharedVehicleSignal[]
+}
+
+model SharedSearchMember {
+  id             String   @id @default(cuid())
+  sharedSearchId String
+  userId         String
+  displayName    String
+  role           String   @default("member")
+  createdAt      DateTime @default(now())
+
+  search SharedSearch @relation(fields: [sharedSearchId], references: [id], onDelete: Cascade)
+  user   User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([sharedSearchId, userId])
+}
+
+model SharedVehicleSignal {
+  id             String   @id @default(cuid())
+  sharedSearchId String
+  userId         String
+  listingId      String
+  signalType     String // like | dislike | veto | duel_win | duel_loss
+  createdAt      DateTime @default(now())
+
+  search  SharedSearch   @relation(fields: [sharedSearchId], references: [id], onDelete: Cascade)
+  user    User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing VehicleListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@unique([sharedSearchId, userId, listingId])
+  @@index([sharedSearchId, listingId])
+}
+
+model VehicleModelKnowledge {
+  id               String   @id @default(cuid())
+  modelId          String   @unique
+  summary          String
+  commonIssuesJson Json?
+  maintenanceNotesJson Json?
+  ownerSentiment   String?
+  reliabilityScore Int?
+  comfortScore     Int?
+  sportinessScore  Int?
+  familyScore      Int?
+  buyingAdvice     String?
+  sourcesJson      Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  model VehicleModel @relation(fields: [modelId], references: [id], onDelete: Cascade)
+}
+
+model SellerLead {
+  id                 String   @id @default(cuid())
+  userId             String?
+  make               String
+  model              String
+  year               Int
+  mileage            Int
+  fuelType           FuelType?
+  condition          String
+  estimatedValueMin  Int
+  estimatedValueMax  Int
+  contactName        String?
+  contactEmail       String?
+  contactPhone       String?
+  createdAt          DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+model OwnedVehicle {
+  id                String   @id @default(cuid())
+  userId            String
+  listingId         String?
+  make              String
+  model             String
+  year              Int?
+  purchaseDate      DateTime?
+  purchasePrice     Int?
+  mileageAtPurchase Int?
+  currentMileage    Int?
+  tuvDate           DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events GarageEvent[]
+
+  @@index([userId, createdAt])
+}
+
+model GarageEvent {
+  id             String   @id @default(cuid())
+  ownedVehicleId String
+  type           String // service | tuv | repair | insurance | note
+  title          String
+  date           DateTime
+  cost           Int?
+  note           String?
+  createdAt      DateTime @default(now())
+
+  ownedVehicle OwnedVehicle @relation(fields: [ownedVehicleId], references: [id], onDelete: Cascade)
+}
+
+model EvLifestyleCheck {
+  id                 String   @id @default(cuid())
+  userId             String?
+  dailyCommuteKm     Int
+  weeklyKm           Int
+  longestRegularKm   Int?
+  homeCharging       Boolean
+  workCharging       Boolean
+  housingType        String
+  preferredListingId String?
+  resultJson         Json
+  createdAt          DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
 // ─── Betrieb / Analytics ───────────────────────────────────────────────────
 
 model ImportLog {
@@ -499,6 +693,9 @@ model VehicleModel {
   specs         VehicleModelSpecs?
   modelSwipes   ModelSwipeEvent[]
   listingMatches VehicleModelToListingMatch[]
+  knowledge     VehicleModelKnowledge?
+  priceStats     VehicleModelPriceStats?
+  modelPriceHistory VehiclePriceHistory[]
 
   @@unique([make, model, variant])
   @@index([bodyType, segment])

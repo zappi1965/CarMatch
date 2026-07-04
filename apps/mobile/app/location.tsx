@@ -32,7 +32,12 @@ export default function LocationScreen() {
       const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced })
       const places = await Location.reverseGeocodeAsync(pos.coords).catch(() => [])
       const city = places[0]?.city ?? places[0]?.subregion ?? undefined
-      apply({ latitude: pos.coords.latitude, longitude: pos.coords.longitude, city, postalCode: places[0]?.postalCode ?? undefined })
+      apply({
+        latitude: pos.coords.latitude,
+        longitude: pos.coords.longitude,
+        city,
+        postalCode: places[0]?.postalCode ?? undefined,
+      })
     } catch {
       setGpsError(true)
     } finally {
@@ -69,7 +74,11 @@ export default function LocationScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg, padding: spacing(4), gap: spacing(4) }}>
-      <CTAButton label={busy ? t('common.loading') : `📍 ${t('location.useGps')}`} onPress={() => void useGps()} disabled={busy} />
+      <CTAButton
+        label={busy ? t('common.loading') : `📍 ${t('location.useGps')}`}
+        onPress={() => void useGps()}
+        disabled={busy}
+      />
       {gpsError ? (
         <Text style={[typography.badge, { color: colors.warn }]}>{t('location.gpsDenied')}</Text>
       ) : null}
@@ -101,7 +110,9 @@ export default function LocationScreen() {
             return (
               <Pressable key={String(r)} onPress={() => setRadiusKm(r)}>
                 <View style={[styles.chip, active && styles.chipActive]}>
-                  <Text style={[typography.badge, { color: active ? colors.text : colors.textMuted }]}>
+                  <Text
+                    style={[typography.badge, { color: active ? colors.text : colors.textMuted }]}
+                  >
                     {r == null ? t('location.nationwide') : `${r} km`}
                   </Text>
                 </View>

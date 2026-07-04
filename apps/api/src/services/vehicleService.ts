@@ -5,6 +5,8 @@ import { prisma } from '../db.js'
 import { assessPrice, computeRiskFlags } from '../scores/priceAssessment.js'
 import { computeVehicleScores } from '../scores/vehicleScores.js'
 import { getAdapter } from '../providers/registry.js'
+import { calculateMonthlyOwnershipCost } from './kaufhilfe/monthlyCost.js'
+import { buildMarketTimingInsight } from './kaufhilfe/marketTiming.js'
 
 /** Prisma-Where aus dem gemeinsamen Filterobjekt. */
 export function buildWhere(filters: VehicleFilters): Prisma.VehicleListingWhereInput {
@@ -81,14 +83,15 @@ export async function findComparables(listing: {
 }
 
 /** Detailansicht inkl. Kaufhilfe (Preisbewertung, Risiken, Quartett-Scores, Attribution). */
-export async function getListingWithInsights(id: string, userPoint?: GeoPoint) {
+export async function getListingWithInsights(id: string, userPoint?: GeoPoint, userId?: string) {
   const listing = await prisma.vehicleListing.findUnique({
     where: { id },
-    include: { specs: true, dealer: true, sponsored: { where: { status: 'ACTIVE' } } },
+    include: { specs: true, dealer: true, sponsored: { where: { status: 'ACTIVE' } }, modelMatches: { include: { vehicleModel: { include: { knowledge: true } } }, take: 1 } },
   })
   if (!listing) return null
 
   const comparables = await findComparables(listing)
+  const user = userId ? await prisma.user.findUnique({ where: { id: userId }, select: { monthlyBudgetEur: true } }) : null
   const priceAssessment = assessPrice(listing, comparables)
   const riskFlags = computeRiskFlags(listing, priceAssessment)
   const pricesPerHp = comparables
@@ -119,6 +122,23 @@ export async function getListingWithInsights(id: string, userPoint?: GeoPoint) {
     medianPricePerHp,
   })
 
+  const monthlyCost = calculateMonthlyOwnershipCost({
+    price: listing.price,
+    year: listing.year,
+    mileage: listing.mileage,
+    powerHp: listing.powerHp,
+    fuelType: listing.fuelType,
+    consumptionL100: listing.consumptionL100 ?? listing.specs?.consumptionL100,
+    energyConsumptionKwh100: listing.specs?.consumptionL100,
+    co2GKm: listing.co2GKm,
+    displacementCcm: listing.displacementCcm,
+    bodyType: listing.bodyType,
+    userMonthlyBudgetEur: user?.monthlyBudgetEur,
+  })
+  const priceHistory = await prisma.vehiclePriceHistory.findMany({ where: { OR: [{ listingId: listing.id }, { modelId: listing.vehicleModelId ?? undefined }] }, orderBy: { date: 'asc' }, take: 60 })
+  const marketTiming = buildMarketTimingInsight({ currentPrice: listing.price, model: `${listing.make} ${listing.model}`, bodyType: listing.bodyType, history: priceHistory.map((h) => ({ price: h.price, date: h.date })), monthlyBudget: user?.monthlyBudgetEur })
+  const modelKnowledge = listing.modelMatches[0]?.vehicleModel.knowledge ?? null
+
   const attribution = getAdapter(listing.provider)?.getSourceAttribution() ?? null
   const dist =
     userPoint && listing.latitude != null && listing.longitude != null
@@ -130,6 +150,9 @@ export async function getListingWithInsights(id: string, userPoint?: GeoPoint) {
     rawData: undefined, // Rohdaten nicht an Clients ausliefern
     distanceKm: dist,
     priceAssessment,
+    monthlyCost,
+    marketTiming,
+    modelKnowledge,
     riskFlags,
     scores,
     attribution,

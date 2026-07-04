@@ -23,8 +23,14 @@ export default function ModelListingsScreen() {
 
   useEffect(() => {
     if (!id) return
-    void api.get<VehicleModelDto>(`/vehicle-models/${id}`).then(setModel).catch(() => {})
-    void api.get<ModelListingMatch[]>(`/vehicle-models/${id}/listings`).then(setMatches).catch(() => setMatches([]))
+    void api
+      .get<VehicleModelDto>(`/vehicle-models/${id}`)
+      .then(setModel)
+      .catch(() => {})
+    void api
+      .get<ModelListingMatch[]>(`/vehicle-models/${id}/listings`)
+      .then(setMatches)
+      .catch(() => setMatches([]))
   }, [id])
 
   if (!model || matches === null) return <LoadingState label={t('common.loading')} />
@@ -51,18 +57,27 @@ export default function ModelListingsScreen() {
         >
           <Image source={{ uri: item.listing.images[0] }} style={styles.thumb} />
           <View style={{ flex: 1, padding: spacing(3) }}>
-            <Text style={[typography.body, { color: colors.text, fontWeight: '700' }]} numberOfLines={1}>
+            <Text
+              style={[typography.body, { color: colors.text, fontWeight: '700' }]}
+              numberOfLines={1}
+            >
               {item.listing.title}
             </Text>
             <Text style={[typography.body, { color: colors.gold, fontWeight: '700' }]}>
               {formatPrice(item.listing.price, item.listing.currency)}
             </Text>
             <Text style={[typography.badge, { color: colors.textFaint, marginTop: 2 }]}>
-              {item.listing.year ?? '–'} · {formatKm(item.listing.mileage)} · {item.listing.city ?? ''}
+              {item.listing.year ?? '–'} · {formatKm(item.listing.mileage)} ·{' '}
+              {item.listing.city ?? ''}
             </Text>
             <View style={{ flexDirection: 'row', gap: spacing(1.5), marginTop: spacing(1.5) }}>
-              <Badge label={`${t('taste.matchReason')} ${Math.round(item.matchScore * 100)} %`} tone="gold" />
-              {item.listing.imagesAreDemo ? <Badge label={t('discover.demoBadge')} tone="warn" /> : null}
+              <Badge
+                label={`${t('taste.matchReason')} ${Math.round(item.matchScore * 100)} %`}
+                tone="gold"
+              />
+              {item.listing.imagesAreDemo ? (
+                <Badge label={t('discover.demoBadge')} tone="warn" />
+              ) : null}
             </View>
           </View>
         </Pressable>

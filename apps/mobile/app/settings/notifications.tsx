@@ -5,7 +5,14 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../src/lib/api'
 import { colors, radius, spacing, typography } from '../../src/lib/theme'
 
-const CATEGORIES = ['newMatch', 'priceDrop', 'favoriteGone', 'savedSearch', 'dealerReply', 'superMatch'] as const
+const CATEGORIES = [
+  'newMatch',
+  'priceDrop',
+  'favoriteGone',
+  'savedSearch',
+  'dealerReply',
+  'superMatch',
+] as const
 
 /**
  * Push-Einstellungen: Kategorien einzeln schaltbar (Consent-Pflicht).
@@ -43,14 +50,19 @@ export default function NotificationSettingsScreen() {
   }
 
   return (
-    <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={{ padding: spacing(4) }}>
+    <ScrollView
+      style={{ backgroundColor: colors.bg }}
+      contentContainerStyle={{ padding: spacing(4) }}
+    >
       <Text style={[typography.body, { color: colors.textMuted, marginBottom: spacing(4) }]}>
         {t('push.hint')}
       </Text>
       <View style={styles.box}>
         {CATEGORIES.map((key) => (
           <View key={key} style={styles.row}>
-            <Text style={[typography.body, { color: colors.text, flex: 1, paddingRight: spacing(3) }]}>
+            <Text
+              style={[typography.body, { color: colors.text, flex: 1, paddingRight: spacing(3) }]}
+            >
               {t(`push.${key}`)}
             </Text>
             <Switch

@@ -1,6 +1,3 @@
-import { prisma } from '../db.js'
-import type { VehicleModel, VehicleListing } from '@prisma/client'
-
 /**
  * Model-zu-Inserat-Matching: verknüpft generelle Fahrzeugmodelle mit echten
  * Inseraten ("Ähnliche echte Angebote finden").
@@ -12,9 +9,27 @@ import type { VehicleModel, VehicleListing } from '@prisma/client'
  *  - Karosserieform stimmt überein                       → +0.10
  * Nur Matches ≥ 0.6 werden gespeichert; ≥ 0.75 setzt vehicleModelId am Inserat.
  */
+type ModelMatchInput = {
+  make: string
+  model: string
+  variant?: string | null
+  bodyType?: string | null
+  minPowerHp?: number | null
+  maxPowerHp?: number | null
+}
+
+type ListingMatchInput = {
+  make: string
+  model: string
+  variant?: string | null
+  title: string
+  bodyType?: string | null
+  powerHp?: number | null
+}
+
 export function computeModelListingMatch(
-  model: Pick<VehicleModel, 'make' | 'model' | 'variant' | 'bodyType' | 'minPowerHp' | 'maxPowerHp'>,
-  listing: Pick<VehicleListing, 'make' | 'model' | 'variant' | 'title' | 'bodyType' | 'powerHp'>,
+  model: ModelMatchInput,
+  listing: ListingMatchInput,
 ): { score: number; reasons: string[] } {
   const reasons: string[] = []
   const norm = (s: string | null | undefined) =>
@@ -57,6 +72,7 @@ const LINK_MIN = 0.75
 
 /** Matcht alle Modelle gegen den aktuellen Inseratsbestand (nach Sync/Seed). */
 export async function rebuildModelListingMatches(): Promise<{ matches: number }> {
+  const { prisma } = await import('../db.js')
   const [models, listings] = await Promise.all([
     prisma.vehicleModel.findMany(),
     prisma.vehicleListing.findMany({ where: { isAvailable: true } }),
