@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Alert, Image, Linking, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
+import { Alert, Image, Linking, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import { useLocalSearchParams } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { api, buildQuery } from '../../src/lib/api'
@@ -24,6 +24,14 @@ export default function VehicleDetailScreen() {
   const [evKm, setEvKm] = useState('40')
   const [evHome, setEvHome] = useState(true)
   const [evResult, setEvResult] = useState<{ verdict: string; usableRangeKm?: number; chargesPerWeek?: number } | null>(null)
+  const [advisor, setAdvisor] = useState<{
+    inspectionChecklist: string[]
+    hiddenCostAlerts: string[]
+    negotiation: { arguments?: string[]; suggestedOffer?: number | null } | string[]
+    whyCheap: string[]
+    dealerTrust: { level?: string; signals?: string[] } | string[]
+  } | null>(null)
+  const [advisorOpen, setAdvisorOpen] = useState(false)
 
   useEffect(() => {
     if (!id) return
@@ -204,6 +212,40 @@ export default function VehicleDetailScreen() {
           </View>
         ) : null}
 
+        {/* Kaufcheck (regelbasierter Kaufberater) */}
+        <View style={styles.box}>
+          <Pressable onPress={() => {
+            setAdvisorOpen(!advisorOpen)
+            if (!advisor) {
+              void api.get<typeof advisor>(`/buying-assistant/check/${data.id}`).then((d) => setAdvisor(d)).catch(() => {})
+            }
+          }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Text style={[typography.label, { color: colors.textMuted }]}>🛡 {t('advisor.title')}</Text>
+              <Text style={{ color: colors.textFaint }}>{advisorOpen ? '▾' : '▸'}</Text>
+            </View>
+          </Pressable>
+          {advisorOpen && advisor ? (
+            <View style={{ marginTop: spacing(3), gap: spacing(3) }}>
+              <AdvisorList title={t('advisor.checklist')} items={advisor.inspectionChecklist} glyph="☐" />
+              <AdvisorList title={t('advisor.hiddenCosts')} items={advisor.hiddenCostAlerts} glyph="⚠︎" tone={colors.warn} />
+              <AdvisorList
+                title={t('advisor.negotiation')}
+                items={Array.isArray(advisor.negotiation) ? advisor.negotiation : (advisor.negotiation.arguments ?? [])}
+                glyph="•"
+              />
+              <AdvisorList title={t('advisor.whyCheap')} items={advisor.whyCheap} glyph="?" />
+              <AdvisorList
+                title={t('advisor.dealerTrust')}
+                items={Array.isArray(advisor.dealerTrust) ? advisor.dealerTrust : (advisor.dealerTrust.signals ?? [])}
+                glyph="✓"
+                tone={colors.like}
+              />
+              <Text style={[typography.badge, { color: colors.textFaint }]}>{t('advisor.disclaimer')}</Text>
+            </View>
+          ) : null}
+        </View>
+
         {/* Sparziel */}
         {!goalSaved ? (
           <CTAButton
@@ -257,6 +299,20 @@ export default function VehicleDetailScreen() {
         )}
       </View>
     </ScrollView>
+  )
+}
+
+function AdvisorList({ title, items, glyph, tone }: { title: string; items: string[]; glyph: string; tone?: string }) {
+  if (!items || items.length === 0) return null
+  return (
+    <View>
+      <Text style={[typography.badge, { color: colors.textMuted, fontWeight: '700', marginBottom: 4 }]}>{title}</Text>
+      {items.slice(0, 6).map((item) => (
+        <Text key={item} style={[typography.body, { color: tone ?? colors.text, fontSize: 13, marginBottom: 3 }]}>
+          {glyph} {item}
+        </Text>
+      ))}
+    </View>
   )
 }
 

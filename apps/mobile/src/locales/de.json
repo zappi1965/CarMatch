@@ -433,5 +433,17 @@
   },
   "attribution": {
     "photo": "{{text}} · Quelle öffnen"
+  },
+  "advisor": {
+    "title": "Kaufcheck",
+    "open": "Kaufcheck anzeigen",
+    "checklist": "Besichtigungs-Checkliste",
+    "hiddenCosts": "Versteckte Kosten im Blick",
+    "negotiation": "Verhandlung",
+    "whyCheap": "Warum so günstig?",
+    "dealerTrust": "Anbieter-Einschätzung",
+    "financing": "Finanzierung simulieren",
+    "monthlyRate": "≈ {{rate}} €/Monat bei {{months}} Monaten",
+    "disclaimer": "Automatische Hinweise auf Basis der Inseratsdaten — ersetzt keine Begutachtung."
   }
 }

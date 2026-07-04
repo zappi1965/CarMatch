@@ -433,5 +433,17 @@
   },
   "attribution": {
     "photo": "{{text}} · open source"
+  },
+  "advisor": {
+    "title": "Buying check",
+    "open": "Show buying check",
+    "checklist": "Inspection checklist",
+    "hiddenCosts": "Hidden costs to watch",
+    "negotiation": "Negotiation",
+    "whyCheap": "Why so cheap?",
+    "dealerTrust": "Seller assessment",
+    "financing": "Simulate financing",
+    "monthlyRate": "≈ €{{rate}}/mo over {{months}} months",
+    "disclaimer": "Automated hints based on listing data — not a substitute for an inspection."
   }
 }
