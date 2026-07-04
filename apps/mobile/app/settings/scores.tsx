@@ -6,16 +6,8 @@ import { api } from '../../src/lib/api'
 import { colors, radius, spacing, typography } from '../../src/lib/theme'
 
 const ALL_SCORES: VehicleScoreKey[] = [
-  'performance',
-  'everyday',
-  'priceValue',
-  'runningCosts',
-  'rarity',
-  'comfort',
-  'fun',
-  'efficiency',
-  'family',
-  'longDistance',
+  'performance', 'everyday', 'priceValue', 'runningCosts', 'rarity',
+  'comfort', 'fun', 'efficiency', 'family', 'longDistance',
 ]
 
 /** Score-Einstellungen: Nutzer wählt, welche Quartett-Werte angezeigt werden. */
@@ -41,10 +33,7 @@ export default function ScoreSettingsScreen() {
   }
 
   return (
-    <ScrollView
-      style={{ backgroundColor: colors.bg }}
-      contentContainerStyle={{ padding: spacing(4) }}
-    >
+    <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={{ padding: spacing(4) }}>
       <Text style={[typography.body, { color: colors.textMuted, marginBottom: spacing(4) }]}>
         {t('settings.scoresHint')}
       </Text>

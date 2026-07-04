@@ -10,6 +10,8 @@
  *     Details/Mehr geöffnet    +2
  *     DISLIKE Modell           -5
  *     SKIP Modell              -1
+ *     Duell gewonnen           +6   (Paarvergleich ist informationsreicher)
+ *     Duell verloren           -2
  *   Kaufmodus (Purchase Signals)
  *     SUPERLIKE Inserat       +15
  *     LIKE Inserat             +8
@@ -36,7 +38,7 @@ export interface TasteAttributes {
 }
 
 export interface TasteSignal {
-  kind: 'MODEL' | 'LISTING'
+  kind: 'MODEL' | 'LISTING' | 'DUEL_WIN' | 'DUEL_LOSS'
   action: SwipeAction
   dwellTimeMs?: number | null
   openedDetails?: boolean
@@ -76,6 +78,8 @@ export function emptyTasteProfile(): TasteProfile {
 }
 
 export function tasteSignalWeight(s: TasteSignal): number {
+  if (s.kind === 'DUEL_WIN') return 6
+  if (s.kind === 'DUEL_LOSS') return -2
   const base: Record<'MODEL' | 'LISTING', Record<SwipeAction, number>> = {
     MODEL: { SUPERLIKE: 10, LIKE: 5, DISLIKE: -5, SKIP: -1 },
     LISTING: { SUPERLIKE: 15, LIKE: 8, DISLIKE: -8, SKIP: -1 },

@@ -9,7 +9,6 @@ import {
 import { emptyTasteProfile } from '../recommendation/taste.js'
 import { getTasteProfile } from './tasteProfileService.js'
 import { buildWhere, geoWhere, filterByExactRadius } from './vehicleService.js'
-import { calculateMonthlyOwnershipCost } from './kaufhilfe/monthlyCost.js'
 
 /** Lädt (oder initialisiert) das persistierte Präferenzprofil. */
 export async function getProfile(userId: string): Promise<UserPreferenceProfile> {
@@ -126,19 +125,6 @@ export async function discover(opts: DiscoverOptions) {
       { ...c, sponsoredBoost: c.sponsored.reduce((acc, s) => Math.max(acc, s.boost), 0) },
       { userPoint: point, radiusKm, recentlyShownKeys },
     )
-    const estimatedMonthly = calculateMonthlyOwnershipCost({
-      price: c.price, year: c.year, mileage: c.mileage, powerHp: c.powerHp,
-      fuelType: c.fuelType, consumptionL100: c.consumptionL100, co2GKm: c.co2GKm,
-      displacementCcm: c.displacementCcm, bodyType: c.bodyType,
-      userMonthlyBudgetEur: user?.monthlyBudgetEur,
-    })
-    if (user?.monthlyBudgetEur) {
-      const overRatio = estimatedMonthly.total / user.monthlyBudgetEur
-      const penalty = overRatio <= 1 ? 0.04 : overRatio <= 1.15 ? -0.04 : -0.14
-      breakdown.contextFit = Math.max(0, Math.min(1, breakdown.contextFit + penalty))
-      breakdown.organicTotal = Math.round((breakdown.organicTotal + penalty) * 1000) / 1000
-      breakdown.finalTotal = Math.round((breakdown.organicTotal + breakdown.sponsoredBoost) * 1000) / 1000
-    }
     return { listing: c, breakdown }
   })
 
@@ -165,27 +151,13 @@ export async function discover(opts: DiscoverOptions) {
     })),
   })
 
-  return top.map((t) => {
-    const monthlyCost = calculateMonthlyOwnershipCost({
-      price: t.listing.price,
-      year: t.listing.year,
-      mileage: t.listing.mileage,
-      powerHp: t.listing.powerHp,
-      fuelType: t.listing.fuelType,
-      consumptionL100: t.listing.consumptionL100,
-      co2GKm: t.listing.co2GKm,
-      displacementCcm: t.listing.displacementCcm,
-      bodyType: t.listing.bodyType,
-      userMonthlyBudgetEur: user?.monthlyBudgetEur,
-    })
-    return {
-      listing: { ...t.listing, rawData: undefined, sponsored: undefined, monthlyCost },
-      distanceKm: 'distanceKm' in t.listing ? (t.listing as { distanceKm?: number }).distanceKm : null,
-      explanation: explain(t),
-      isSponsored: t.breakdown.sponsoredBoost > 0,
-      scoreBreakdown: t.breakdown,
-    }
-  })
+  return top.map((t) => ({
+    listing: { ...t.listing, rawData: undefined, sponsored: undefined },
+    distanceKm: 'distanceKm' in t.listing ? (t.listing as { distanceKm?: number }).distanceKm : null,
+    explanation: explain(t),
+    isSponsored: t.breakdown.sponsoredBoost > 0,
+    scoreBreakdown: t.breakdown,
+  }))
 }
 
 /** DSGVO: Nutzer kann sein Empfehlungsprofil vollständig zurücksetzen. */

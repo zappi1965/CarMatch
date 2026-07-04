@@ -1,5 +1,10 @@
 {
-  "tabs": { "discover": "Discover", "search": "Search", "garage": "Garage", "settings": "Profile" },
+  "tabs": {
+    "discover": "Discover",
+    "search": "Search",
+    "garage": "Garage",
+    "settings": "Profile"
+  },
   "discover": {
     "title": "Discover",
     "empty": "No more vehicles in your area.",
@@ -68,7 +73,11 @@
     "reset": "Reset",
     "comingSoon": "Coming soon"
   },
-  "swipeLabels": { "like": "LIKE", "nope": "PASS", "dream": "DREAM CAR" },
+  "swipeLabels": {
+    "like": "LIKE",
+    "nope": "PASS",
+    "dream": "DREAM CAR"
+  },
   "scores": {
     "title": "Vehicle scores",
     "performance": "Performance",
@@ -205,15 +214,35 @@
     "onlyAccidentFree": "Accident-free only",
     "onlyServiceHistory": "Full service history only",
     "fuelValues": {
-      "PETROL": "Petrol", "DIESEL": "Diesel", "ELECTRIC": "Electric", "HYBRID": "Hybrid",
-      "PLUGIN_HYBRID": "Plug-in hybrid", "LPG": "LPG", "CNG": "CNG", "OTHER": "Other"
+      "PETROL": "Petrol",
+      "DIESEL": "Diesel",
+      "ELECTRIC": "Electric",
+      "HYBRID": "Hybrid",
+      "PLUGIN_HYBRID": "Plug-in hybrid",
+      "LPG": "LPG",
+      "CNG": "CNG",
+      "OTHER": "Other"
     },
-    "transmissionValues": { "MANUAL": "Manual", "AUTOMATIC": "Automatic", "SEMI_AUTOMATIC": "Semi-automatic" },
+    "transmissionValues": {
+      "MANUAL": "Manual",
+      "AUTOMATIC": "Automatic",
+      "SEMI_AUTOMATIC": "Semi-automatic"
+    },
     "bodyValues": {
-      "SEDAN": "Sedan", "WAGON": "Wagon", "SUV": "SUV", "COUPE": "Coupé",
-      "CONVERTIBLE": "Convertible", "HATCHBACK": "Hatchback", "VAN": "Van", "PICKUP": "Pickup", "OTHER": "Other"
+      "SEDAN": "Sedan",
+      "WAGON": "Wagon",
+      "SUV": "SUV",
+      "COUPE": "Coupé",
+      "CONVERTIBLE": "Convertible",
+      "HATCHBACK": "Hatchback",
+      "VAN": "Van",
+      "PICKUP": "Pickup",
+      "OTHER": "Other"
     },
-    "sellerValues": { "DEALER": "Dealer", "PRIVATE": "Private" }
+    "sellerValues": {
+      "DEALER": "Dealer",
+      "PRIVATE": "Private"
+    }
   },
   "location": {
     "title": "Location",
@@ -238,7 +267,10 @@
     "guestActive": "You're browsing as a guest",
     "upgradeHint": "Create an account to keep favorites permanently.",
     "logout": "Sign out",
-    "errors": { "INVALID_CREDENTIALS": "Wrong email or password.", "EMAIL_TAKEN": "This email is already registered." }
+    "errors": {
+      "INVALID_CREDENTIALS": "Wrong email or password.",
+      "EMAIL_TAKEN": "This email is already registered."
+    }
   },
   "settings": {
     "title": "Profile & settings",
@@ -295,5 +327,111 @@
     "km": "km",
     "hp": "hp",
     "offline": "Cannot reach the server."
+  },
+  "costs": {
+    "perMonth": "≈ €{{amount}}/mo",
+    "title": "Monthly costs (estimate)",
+    "depreciation": "Depreciation",
+    "fuel": "Fuel/electricity",
+    "insurance": "Insurance",
+    "tax": "Vehicle tax",
+    "maintenance": "Maintenance",
+    "total": "Total",
+    "assumption": "Assumes {{km}} km/year · rough guidance, no guarantee",
+    "budgetFilter": "Max. monthly cost (€)"
+  },
+  "duel": {
+    "title": "Car duel",
+    "subtitle": "Which one suits you better? Tap your pick.",
+    "entry": "Duel",
+    "decided": "Saved — your profile is learning.",
+    "next": "Next duel"
+  },
+  "circle": {
+    "title": "Search together",
+    "hint": "Search as a couple or family: favorites are compared, overlaps are your matches.",
+    "create": "Create group",
+    "namePlaceholder": "Name, e.g. \"Our next car\"",
+    "join": "Join with code",
+    "codePlaceholder": "Invite code",
+    "inviteCode": "Invite code: {{code}}",
+    "members": "{{count}} members",
+    "matches": "You both like",
+    "partnerPicks": "Others' favorites",
+    "noMatches": "No shared matches yet — keep swiping!",
+    "leave": "Leave group"
+  },
+  "goals": {
+    "title": "Savings goals",
+    "add": "Save as goal",
+    "added": "Goal created.",
+    "target": "Target price",
+    "budget": "Current budget (€)",
+    "monthly": "Saving €/month",
+    "forecast": "At €{{monthly}}/mo reachable in ~{{months}} months",
+    "forecastNow": "Your budget already covers it!",
+    "forecastNever": "Not reachable within 5 years at this rate",
+    "trendDown": "Prices are falling ({{percent}}%) — working in your favor",
+    "empty": "No goal yet — save a dream car that's still too expensive."
+  },
+  "owned": {
+    "title": "My car",
+    "add": "Add car",
+    "currentValue": "Current market value",
+    "noEstimate": "Not enough comparable data for an estimate",
+    "inspectionDue": "Inspection due soon!",
+    "purchase": "Purchase price",
+    "delta": "Value change since purchase",
+    "form": {
+      "make": "Make",
+      "model": "Model",
+      "year": "Year",
+      "mileage": "Mileage",
+      "power": "hp (optional)",
+      "price": "Purchase price € (optional)",
+      "inspection": "Inspection until (YYYY-MM)"
+    }
+  },
+  "sell": {
+    "title": "Sell your car",
+    "subtitle": "What's your car worth? Estimate based on comparable listings.",
+    "estimate": "Estimate value",
+    "estimateResult": "Estimated value",
+    "range": "Range: {{low}} – {{high}}",
+    "basis": "Based on {{count}} comparable listings · confidence {{confidence}}%",
+    "noEstimate": "Not enough comparable data for a serious estimate right now.",
+    "requestOffers": "Get purchase offers",
+    "requested": "Request saved. Dealer offers follow once partners are connected.",
+    "demoNote": "Demo mode: estimate based on demo listings."
+  },
+  "ev": {
+    "title": "EV everyday check",
+    "dailyKm": "Daily distance (km)",
+    "homeCharging": "I can charge at home",
+    "check": "Check",
+    "FITS": "Fits your daily life",
+    "TIGHT": "Doable, but tight",
+    "CHALLENGING": "Will be a hassle day-to-day",
+    "detail": "Usable range ~{{range}} km · ~{{charges}} charges/week"
+  },
+  "trend": {
+    "title": "Market trend",
+    "FALLING": "Prices falling ({{percent}}%)",
+    "RISING": "Prices rising (+{{percent}}%)",
+    "STABLE": "Prices stable",
+    "UNKNOWN": "Not enough data for a trend",
+    "WINTER_CONVERTIBLE": "Tip: convertibles are often cheaper in winter",
+    "SPRING_SUV": "Note: SUV demand picks up in spring"
+  },
+  "model": {
+    "knownIssues": "Known weak spots (not verified)",
+    "reviews": "Owner voices",
+    "writeReview": "Write a review",
+    "isOwner": "I own(ed) this model",
+    "reviewPlaceholder": "Your experience…",
+    "noReviews": "No reviews yet — be the first."
+  },
+  "attribution": {
+    "photo": "{{text}} · open source"
   }
 }

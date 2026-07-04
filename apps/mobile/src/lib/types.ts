@@ -3,8 +3,6 @@ import type {
   RecommendationExplanation,
   RiskFlag,
   VehicleScore,
-  MonthlyOwnershipCostBreakdown,
-  MarketTimingInsight,
 } from '@carmatch/shared'
 
 /** Inserat, wie es die API liefert (DB-Form, ohne rawData). */
@@ -43,6 +41,7 @@ export interface ListingDto {
   financingAvailable?: boolean | null
   images: string[]
   imagesAreDemo: boolean
+  imageAttribution?: string | null
   sellerType: string
   city?: string | null
   postalCode?: string | null
@@ -52,10 +51,7 @@ export interface ListingDto {
   createdAt: string
   specs?: SpecsDto | null
   priceHistory?: Array<{ price: number; recordedAt: string }>
-  monthlyCost?: MonthlyOwnershipCostBreakdown
 }
-
-export type MonthlyCostDto = MonthlyOwnershipCostBreakdown
 
 export interface SpecsDto {
   zeroToHundred?: number | null
@@ -69,25 +65,31 @@ export interface SpecsDto {
   verified: boolean
 }
 
+export interface MonthlyCostsDto {
+  depreciation: number
+  fuel: number
+  insurance: number
+  tax: number
+  maintenance: number
+  total: number
+  confidence: number
+  assumptions: { kmPerYear: number }
+}
+
+export interface MarketTrendDto {
+  trendPercent: number | null
+  direction: 'FALLING' | 'RISING' | 'STABLE' | 'UNKNOWN'
+  sampleSize: number
+  confidence: number
+  seasonalHint: string | null
+}
+
 export interface DiscoverItem {
   listing: ListingDto
   distanceKm?: number | null
   explanation: RecommendationExplanation
   isSponsored: boolean
-  monthlyCost?: MonthlyOwnershipCostBreakdown
-  marketTiming?: MarketTimingInsight
-  modelKnowledge?: {
-    summary: string
-    commonIssuesJson?: string[]
-    maintenanceNotesJson?: string[]
-    ownerSentiment?: string
-    reliabilityScore?: number
-    comfortScore?: number
-    sportinessScore?: number
-    familyScore?: number
-    buyingAdvice?: string
-    sourcesJson?: Array<{ label: string; url?: string; license?: string }>
-  } | null
+  monthlyCosts?: MonthlyCostsDto
 }
 
 export interface ListingInsights extends ListingDto {
@@ -95,22 +97,10 @@ export interface ListingInsights extends ListingDto {
   priceAssessment: PriceAssessment
   riskFlags: RiskFlag[]
   scores: VehicleScore[]
+  monthlyCosts?: MonthlyCostsDto
+  marketTrend?: MarketTrendDto
   attribution?: { displayName: string; attributionText: string } | null
   isSponsored: boolean
-  monthlyCost?: MonthlyOwnershipCostBreakdown
-  marketTiming?: MarketTimingInsight
-  modelKnowledge?: {
-    summary: string
-    commonIssuesJson?: string[]
-    maintenanceNotesJson?: string[]
-    ownerSentiment?: string
-    reliabilityScore?: number
-    comfortScore?: number
-    sportinessScore?: number
-    familyScore?: number
-    buyingAdvice?: string
-    sourcesJson?: Array<{ label: string; url?: string; license?: string }>
-  } | null
 }
 
 /** Generelles Fahrzeugmodell (Inspirationsmodus) — kein Inserat. */
@@ -140,6 +130,9 @@ export interface VehicleModelDto {
   strengthsJson?: string[] | null
   weaknessesJson?: string[] | null
   tagsJson?: string[] | null
+  knownIssuesJson?: string[] | null
+  imageAttribution?: string | null
+  infoUrl?: string | null
   source: string
   specs?: {
     zeroToHundred?: number | null
@@ -173,9 +166,7 @@ export interface TasteInsightDto {
 }
 
 export const formatPrice = (price: number, currency = 'EUR') =>
-  new Intl.NumberFormat('de-DE', { style: 'currency', currency, maximumFractionDigits: 0 }).format(
-    price,
-  )
+  new Intl.NumberFormat('de-DE', { style: 'currency', currency, maximumFractionDigits: 0 }).format(price)
 
 export const formatKm = (km?: number | null) =>
   km == null ? '–' : `${new Intl.NumberFormat('de-DE').format(km)} km`

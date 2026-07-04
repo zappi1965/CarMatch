@@ -25,11 +25,7 @@ export default function LanguageScreen() {
     <View style={{ flex: 1, backgroundColor: colors.bg, padding: spacing(4) }}>
       <View style={styles.box}>
         {LANGS.map(({ code, label }) => (
-          <Pressable
-            key={code}
-            onPress={() => select(code)}
-            style={({ pressed }) => [styles.row, pressed && { opacity: 0.7 }]}
-          >
+          <Pressable key={code} onPress={() => select(code)} style={({ pressed }) => [styles.row, pressed && { opacity: 0.7 }]}>
             <Text style={[typography.body, { color: colors.text }]}>
               {code === 'auto' ? t('settings.languageAuto') : label}
             </Text>

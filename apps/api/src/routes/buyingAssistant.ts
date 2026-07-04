@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 import { prisma } from '../db.js'
+import { findComparables } from '../services/vehicleService.js'
 import {
   buildDealerTrust,
   buildDreamAlternatives,
@@ -8,73 +9,99 @@ import {
   buildHiddenCostAlerts,
   buildInspectionChecklist,
   buildNegotiationAdvice,
-  buildPartnerCompromise,
   buildServicePlan,
   buildWhyCheap,
   compareListings,
 } from '../services/advisory/buyingAssistant.js'
 
-const financeSchema = z.object({ price: z.number().int().positive(), downPayment: z.number().int().nonnegative().optional(), months: z.number().int().min(12).max(96).optional(), annualRate: z.number().min(0).max(20).optional(), residualValue: z.number().int().nonnegative().optional() })
-const compareSchema = z.object({ listingIds: z.array(z.string()).min(2).max(4) })
-const dreamSchema = z.object({ dreamMake: z.string().optional(), dreamModel: z.string().min(1), monthlyBudgetEur: z.number().int().positive().default(550) })
-
+/**
+ * Regelbasierter Kaufberater (aus der Parallel-Implementierung übernommen und
+ * an das PR-Schema angepasst): Checklisten, Verhandlungs-Hinweise, versteckte
+ * Kosten, Finanzierungsrechner, Vergleich. Kein LLM — reine Heuristiken.
+ */
 export async function buyingAssistantRoutes(app: FastifyInstance) {
-  app.get('/listings/:id', { preHandler: [app.authenticate] }, async (req, reply) => {
-    const { id } = z.object({ id: z.string() }).parse(req.params)
+  /** Kaufcheck zu einem Inserat: Checkliste + Kosten-Warnungen + Verhandlung. */
+  app.get('/check/:listingId', { preHandler: [app.authenticate] }, async (req, reply) => {
+    const { listingId } = z.object({ listingId: z.string() }).parse(req.params)
     const listing = await prisma.vehicleListing.findUnique({
-      where: { id },
-      include: {
-        priceHistory: { orderBy: { recordedAt: 'desc' }, take: 12 },
-        dealer: true,
-        specs: true,
-      },
+      where: { id: listingId },
+      include: { specs: true },
     })
     if (!listing) return reply.code(404).send({ ok: false, error: 'NOT_FOUND' })
-    const model = await prisma.vehicleModel.findFirst({
-      where: { make: listing.make, OR: [{ model: listing.model }, { model: { contains: listing.model.split(' ')[0], mode: 'insensitive' } }] },
-      include: { knowledge: true },
-    })
-    const marketAverage = listing.priceHistory.length
-      ? Math.round(listing.priceHistory.reduce((sum, p) => sum + p.price, 0) / listing.priceHistory.length)
+
+    // Baureihen-Wissen aus der Modell-Ebene (bekannte Schwachstellen)
+    const model = listing.vehicleModelId
+      ? await prisma.vehicleModel.findUnique({ where: { id: listing.vehicleModelId } })
       : null
+    const knowledge = model ? { commonIssuesJson: model.knownIssuesJson } : null
+
+    const comparables = await findComparables(listing)
+    const prices = comparables.map((c) => c.price)
+    const marketAverage = prices.length >= 3 ? prices.reduce((s, p) => s + p, 0) / prices.length : null
+
     return {
-      listingId: listing.id,
-      hiddenCostAlerts: buildHiddenCostAlerts(listing, model?.knowledge),
-      inspectionChecklist: buildInspectionChecklist(listing, model?.knowledge),
-      negotiationAdvice: buildNegotiationAdvice(listing, marketAverage),
-      whyCheap: buildWhyCheap(listing, marketAverage),
-      dealerTrust: buildDealerTrust(listing),
-      financing: buildFinancingSimulation({ price: listing.price }),
-      modelKnowledge: model?.knowledge ?? null,
+      ok: true,
+      data: {
+        inspectionChecklist: buildInspectionChecklist(listing, knowledge),
+        hiddenCostAlerts: buildHiddenCostAlerts(listing, knowledge),
+        negotiation: buildNegotiationAdvice(listing, marketAverage),
+        whyCheap: buildWhyCheap(listing, marketAverage),
+        dealerTrust: buildDealerTrust(listing),
+        comparablesCount: comparables.length,
+      },
     }
   })
 
-  app.post('/compare', { preHandler: [app.authenticate] }, async (req) => {
-    const { listingIds } = compareSchema.parse(req.body)
-    const listings = await prisma.vehicleListing.findMany({ where: { id: { in: listingIds } } })
-    return compareListings(listings)
+  /** Finanzierungsrechner (reine Simulation, keine Beratung/kein Angebot). */
+  app.post('/financing', { preHandler: [app.authenticate] }, async (req) => {
+    const body = z
+      .object({
+        price: z.number().int().positive(),
+        downPayment: z.number().int().nonnegative().optional(),
+        months: z.number().int().min(12).max(96).optional(),
+        annualRate: z.number().min(0).max(20).optional(),
+        residualValue: z.number().int().nonnegative().optional(),
+      })
+      .parse(req.body)
+    return { ok: true, data: buildFinancingSimulation(body) }
   })
 
-  app.post('/finance', { preHandler: [app.authenticate] }, async (req) => {
-    return buildFinancingSimulation(financeSchema.parse(req.body))
+  /** Vergleich von 2–4 Inseraten (nutzt die Favoriten-/Garage-Auswahl). */
+  app.post('/compare', { preHandler: [app.authenticate] }, async (req, reply) => {
+    const body = z.object({ listingIds: z.array(z.string()).min(2).max(4) }).parse(req.body)
+    const listings = await prisma.vehicleListing.findMany({ where: { id: { in: body.listingIds } } })
+    if (listings.length < 2) return reply.code(404).send({ ok: false, error: 'LISTINGS_NOT_FOUND' })
+    return { ok: true, data: compareListings(listings) }
   })
 
+  /** Günstigere Alternativen zum Traummodell im Monatsbudget. */
   app.post('/dream-alternatives', { preHandler: [app.authenticate] }, async (req) => {
-    return { alternatives: buildDreamAlternatives(dreamSchema.parse(req.body)) }
+    const body = z
+      .object({
+        dreamMake: z.string().optional(),
+        dreamModel: z.string().min(1),
+        monthlyBudgetEur: z.number().int().positive().default(550),
+      })
+      .parse(req.body)
+    return { ok: true, data: buildDreamAlternatives(body) }
   })
 
-  app.get('/shared/:id/compromise', { preHandler: [app.authenticate] }, async (req, reply) => {
-    const { id } = z.object({ id: z.string() }).parse(req.params)
-    const member = await prisma.sharedSearchMember.findUnique({ where: { sharedSearchId_userId: { sharedSearchId: id, userId: req.user.sub } } })
-    if (!member) return reply.code(403).send({ ok: false, error: 'FORBIDDEN' })
-    const signals = await prisma.sharedVehicleSignal.findMany({ where: { sharedSearchId: id } })
-    return { results: buildPartnerCompromise(signals) }
-  })
-
-  app.get('/owned/:id/service-plan', { preHandler: [app.authenticate] }, async (req, reply) => {
-    const { id } = z.object({ id: z.string() }).parse(req.params)
-    const owned = await prisma.ownedVehicle.findFirst({ where: { id, userId: req.user.sub } })
-    if (!owned) return reply.code(404).send({ ok: false, error: 'NOT_FOUND' })
-    return buildServicePlan(owned)
+  /** Serviceplan für das eigene Fahrzeug ("Mein Auto"). */
+  app.get('/service-plan/:ownedId', { preHandler: [app.authenticate] }, async (req, reply) => {
+    const { ownedId } = z.object({ ownedId: z.string() }).parse(req.params)
+    const owned = await prisma.ownedVehicle.findUnique({ where: { id: ownedId } })
+    if (!owned || owned.userId !== req.user.sub)
+      return reply.code(404).send({ ok: false, error: 'NOT_FOUND' })
+    return {
+      ok: true,
+      data: buildServicePlan({
+        make: owned.make,
+        model: owned.model,
+        year: owned.year,
+        currentMileage: owned.mileage,
+        purchasePrice: owned.purchasePrice,
+        tuvDate: owned.inspectionUntil ? `${owned.inspectionUntil}-01` : null,
+      }),
+    }
   })
 }

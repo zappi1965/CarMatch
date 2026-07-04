@@ -36,7 +36,7 @@ const img = (label: string) => [
   `https://placehold.co/900x560/17181c/f4f2ee/png?text=${encodeURIComponent(label)}`,
 ]
 
-const curatedVehicleModelSeeds: (VehicleModelSeed & { imageUrls: string[] })[] = [
+export const vehicleModelSeeds: (VehicleModelSeed & { imageUrls: string[] })[] = [
   {
     make: 'Porsche', model: 'Panamera', generation: '971', productionStartYear: 2016,
     bodyType: 'SEDAN', vehicleSize: 'large', segment: 'Sportlimousine', doors: 5, seats: 4,
@@ -261,140 +261,20 @@ const curatedVehicleModelSeeds: (VehicleModelSeed & { imageUrls: string[] })[] =
   },
 ]
 
-type CatalogEntry = { make: string; models: string[] }
-
-const catalog: CatalogEntry[] = [
-  { make: 'Audi', models: ['A1', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'Q2', 'Q3', 'Q5', 'Q7', 'Q8', 'TT', 'R8', 'e-tron GT'] },
-  { make: 'BMW', models: ['1er', '2er', '3er', '4er', '5er', '7er', '8er', 'X1', 'X2', 'X3', 'X4', 'X5', 'X6', 'X7', 'Z4', 'i4', 'i5', 'iX'] },
-  { make: 'Mercedes-Benz', models: ['A-Klasse', 'B-Klasse', 'C-Klasse', 'E-Klasse', 'S-Klasse', 'CLA', 'CLS', 'GLA', 'GLB', 'GLC', 'GLE', 'GLS', 'G-Klasse', 'EQA', 'EQB', 'EQE', 'AMG GT'] },
-  { make: 'Porsche', models: ['911', '718 Cayman', '718 Boxster', 'Panamera', 'Macan', 'Cayenne', 'Taycan', 'Boxster', 'Cayman', 'Carrera GT', '918 Spyder'] },
-  { make: 'Volkswagen', models: ['Up', 'Polo', 'Golf', 'Golf GTI', 'Golf R', 'Passat', 'Arteon', 'T-Cross', 'T-Roc', 'Tiguan', 'Touareg', 'Touran', 'Multivan', 'ID.3', 'ID.4', 'ID.5', 'ID. Buzz'] },
-  { make: 'Tesla', models: ['Model 3', 'Model Y', 'Model S', 'Model X', 'Roadster', 'Cybertruck'] },
-  { make: 'Volvo', models: ['EX30', 'EX40', 'C40', 'XC40', 'XC60', 'XC90', 'S60', 'S90', 'V60', 'V90', 'V60 Cross Country', 'V90 Cross Country'] },
-  { make: 'Skoda', models: ['Fabia', 'Scala', 'Octavia', 'Superb', 'Kamiq', 'Karoq', 'Kodiaq', 'Enyaq', 'Elroq', 'Yeti', 'Rapid'] },
-  { make: 'Seat', models: ['Ibiza', 'Leon', 'Leon Sportstourer', 'Ateca', 'Tarraco', 'Arona', 'Alhambra', 'Mii Electric'] },
-  { make: 'Cupra', models: ['Born', 'Formentor', 'Leon', 'Leon Sportstourer', 'Ateca', 'Tavascan', 'Terramar'] },
-  { make: 'Opel', models: ['Corsa', 'Astra', 'Insignia', 'Mokka', 'Crossland', 'Grandland', 'Zafira', 'Combo Life', 'Vivaro', 'Rocks Electric'] },
-  { make: 'Ford', models: ['Fiesta', 'Focus', 'Mondeo', 'Kuga', 'Puma', 'Explorer', 'Mustang', 'Mustang Mach-E', 'S-Max', 'Galaxy', 'Ranger', 'Bronco'] },
-  { make: 'Peugeot', models: ['208', '308', '408', '508', '2008', '3008', '5008', 'Rifter', 'Traveller', 'e-208', 'e-308'] },
-  { make: 'Renault', models: ['Clio', 'Megane', 'Talisman', 'Captur', 'Kadjar', 'Austral', 'Espace', 'Scenic', 'Kangoo', 'Zoe', 'Megane E-Tech'] },
-  { make: 'Citroën', models: ['C3', 'C4', 'C5 X', 'C3 Aircross', 'C5 Aircross', 'Berlingo', 'Spacetourer', 'e-C4'] },
-  { make: 'Fiat', models: ['500', '500e', '500X', 'Panda', 'Tipo', 'Punto', 'Ducato', 'Doblo'] },
-  { make: 'Toyota', models: ['Aygo X', 'Yaris', 'Corolla', 'Camry', 'Prius', 'C-HR', 'RAV4', 'Highlander', 'Land Cruiser', 'GR86', 'GR Supra', 'bZ4X'] },
-  { make: 'Lexus', models: ['UX', 'NX', 'RX', 'RZ', 'ES', 'LS', 'LC', 'RC', 'IS'] },
-  { make: 'Honda', models: ['Jazz', 'Civic', 'Accord', 'HR-V', 'CR-V', 'ZR-V', 'e:Ny1', 'NSX', 'S2000'] },
-  { make: 'Mazda', models: ['Mazda2', 'Mazda3', 'Mazda6', 'CX-3', 'CX-30', 'CX-5', 'CX-60', 'MX-5', 'MX-30', 'RX-8'] },
-  { make: 'Nissan', models: ['Micra', 'Juke', 'Qashqai', 'X-Trail', 'Leaf', 'Ariya', '370Z', 'GT-R', 'Navara'] },
-  { make: 'Hyundai', models: ['i10', 'i20', 'i30', 'i40', 'Bayon', 'Kona', 'Tucson', 'Santa Fe', 'Ioniq', 'Ioniq 5', 'Ioniq 6', 'Nexo'] },
-  { make: 'Kia', models: ['Picanto', 'Rio', 'Ceed', 'Proceed', 'Stinger', 'XCeed', 'Sportage', 'Sorento', 'Niro', 'Soul EV', 'EV3', 'EV6', 'EV9'] },
-  { make: 'Mini', models: ['3-Türer', '5-Türer', 'Clubman', 'Countryman', 'Cabrio', 'Cooper SE', 'Paceman'] },
-  { make: 'Alfa Romeo', models: ['Giulia', 'Stelvio', 'Tonale', 'MiTo', 'Giulietta', '4C', '8C'] },
-  { make: 'Jeep', models: ['Renegade', 'Compass', 'Cherokee', 'Grand Cherokee', 'Wrangler', 'Avenger', 'Gladiator'] },
-  { make: 'Land Rover', models: ['Defender', 'Discovery Sport', 'Discovery', 'Range Rover Evoque', 'Range Rover Velar', 'Range Rover Sport', 'Range Rover'] },
-  { make: 'Jaguar', models: ['XE', 'XF', 'XJ', 'F-Type', 'F-Pace', 'E-Pace', 'I-Pace'] },
-  { make: 'Maserati', models: ['Ghibli', 'Quattroporte', 'Levante', 'Grecale', 'GranTurismo', 'MC20'] },
-  { make: 'Polestar', models: ['Polestar 2', 'Polestar 3', 'Polestar 4'] },
-  { make: 'MG', models: ['MG3', 'MG4', 'MG5', 'ZS', 'HS', 'Marvel R', 'Cyberster'] },
-  { make: 'Dacia', models: ['Sandero', 'Logan', 'Duster', 'Jogger', 'Spring', 'Lodgy'] },
-  { make: 'Suzuki', models: ['Swift', 'Ignis', 'Baleno', 'Vitara', 'S-Cross', 'Jimny', 'Across'] },
-  { make: 'Subaru', models: ['Impreza', 'Levorg', 'WRX STI', 'XV', 'Crosstrek', 'Forester', 'Outback', 'BRZ', 'Solterra'] },
-  { make: 'Mitsubishi', models: ['Space Star', 'Colt', 'ASX', 'Eclipse Cross', 'Outlander', 'L200'] },
-  { make: 'Smart', models: ['Fortwo', 'Forfour', '#1', '#3'] },
-  { make: 'Genesis', models: ['G70', 'G80', 'G90', 'GV60', 'GV70', 'GV80'] },
-  { make: 'Ferrari', models: ['Roma', 'Portofino', '296 GTB', 'F8 Tributo', 'SF90 Stradale', '812 Superfast', 'Purosangue'] },
-  { make: 'Lamborghini', models: ['Huracán', 'Aventador', 'Revuelto', 'Urus', 'Gallardo'] },
-  { make: 'McLaren', models: ['570S', '600LT', '720S', '750S', 'GT', 'Artura', 'Senna'] },
-  { make: 'Aston Martin', models: ['Vantage', 'DB11', 'DB12', 'DBS', 'Vanquish', 'DBX'] },
-  { make: 'Chevrolet', models: ['Spark', 'Aveo', 'Cruze', 'Malibu', 'Camaro', 'Corvette', 'Trax', 'Equinox', 'Tahoe', 'Suburban', 'Silverado'] },
-  { make: 'Dodge', models: ['Challenger', 'Charger', 'Durango', 'Journey', 'Viper', 'RAM 1500'] },
-  { make: 'Cadillac', models: ['ATS', 'CTS', 'CT4', 'CT5', 'Escalade', 'XT4', 'XT5', 'XT6', 'Lyriq'] },
-  { make: 'Lincoln', models: ['Navigator', 'Aviator', 'Corsair', 'Nautilus', 'Continental'] },
-  { make: 'Bentley', models: ['Continental GT', 'Flying Spur', 'Bentayga', 'Mulsanne', 'Azure'] },
-  { make: 'Rolls-Royce', models: ['Ghost', 'Phantom', 'Wraith', 'Dawn', 'Cullinan', 'Spectre'] },
-  { make: 'Lotus', models: ['Elise', 'Exige', 'Evora', 'Emira', 'Eletre', 'Evija'] },
-  { make: 'DS Automobiles', models: ['DS 3', 'DS 4', 'DS 7', 'DS 9'] },
-  { make: 'Abarth', models: ['595', '695', '124 Spider', '500e'] },
-  { make: 'Lancia', models: ['Ypsilon', 'Delta', 'Thema', 'Voyager'] },
-  { make: 'Saab', models: ['9-3', '9-5', '900', '9000'] },
-  { make: 'Infiniti', models: ['Q30', 'Q50', 'Q60', 'Q70', 'QX30', 'QX50', 'QX70'] },
-  { make: 'Lucid', models: ['Air', 'Gravity'] },
-  { make: 'BYD', models: ['Atto 3', 'Dolphin', 'Seal', 'Seal U', 'Tang', 'Han'] },
-  { make: 'Nio', models: ['ET5', 'ET7', 'EL6', 'EL7', 'EL8'] },
-]
-
-const isElectricModel = (make: string, model: string) => /(^|\b)(e-|i[345x]|id\.|eq|ev|ioniq|leaf|ariya|taycan|polestar|model [3ysx]|mach-e|born|spring|bZ4X|RZ|I-Pace|Solterra|#1|#3)/i.test(`${make} ${model}`)
-const isSuvModel = (model: string) => /(x[1-7]|q[23578]|gl[abcse]|xc|ex|cx-|c-hr|rav4|land cruiser|juke|qashqai|x-trail|kona|tucson|santa fe|sportage|sorento|niro|countryman|stelvio|tonale|renegade|compass|cherokee|wrangler|defender|discovery|range rover|f-pace|e-pace|levante|grecale|gv|duster|vitara|forester|outback|asx|outlander|urus|dbx)/i.test(model)
-const isSportsModel = (make: string, model: string) => /(911|718|boxster|cayman|z4|tt|r8|amg gt|mustang|supra|gr86|mx-5|370z|gt-r|s2000|nsx|4c|f-type|mc20|roma|296|f8|sf90|huracán|aventador|revuelto|570s|720s|750s|vantage|db11|db12|dbs|vanquish|roadster|cyberster)/i.test(`${make} ${model}`)
-const isWagonModel = (model: string) => /(avant|touring|sportstourer|t-modell|variant|shooting brake|v60|v90|proceed|levorg|outback)/i.test(model)
-const isCompactModel = (model: string) => /(polo|golf|a1|a3|1er|2er|corsa|astra|fiesta|focus|208|308|clio|megane|c3|c4|500|panda|yaris|corolla|jazz|civic|mazda2|mazda3|micra|i20|i30|ceed|swift|impreza|space star|fortwo|forfour)/i.test(model)
-
-function archetypeFor(make: string, model: string) {
-  const electric = isElectricModel(make, model)
-  const sports = isSportsModel(make, model)
-  const suv = isSuvModel(model)
-  const wagon = isWagonModel(model)
-  const compact = isCompactModel(model)
-  const premium = /(porsche|bmw|audi|mercedes|lexus|jaguar|land rover|maserati|genesis|ferrari|lamborghini|mclaren|aston martin)/i.test(make)
-  const exotic = /(ferrari|lamborghini|mclaren|aston martin|maserati)/i.test(make)
-  const bodyType = sports ? (model.toLowerCase().includes('boxster') || model.toLowerCase().includes('mx-5') ? 'CONVERTIBLE' : 'COUPE') : suv ? 'SUV' : wagon ? 'WAGON' : compact ? 'HATCHBACK' : 'SEDAN'
-  const vehicleSize = suv || model.match(/s-klasse|a8|7er|x7|q8|gls|range rover|touareg|xc90|sorento|ev9|purosangue/i) ? 'large' : compact ? 'compact' : 'midsize'
-  const segment = electric ? (suv ? 'Elektro-SUV' : 'Elektroauto') : sports ? 'Sportwagen' : suv ? 'SUV' : wagon ? 'Kombi' : compact ? 'Kompaktklasse' : premium ? 'Premium-Limousine' : 'Alltagsauto'
-  const minPowerHp = exotic ? 560 : sports ? 280 : electric ? 170 : premium ? 190 : compact ? 95 : 140
-  const maxPowerHp = exotic ? 1000 : sports ? 650 : electric ? 585 : premium ? 530 : compact ? 320 : 420
-  const priceMin = exotic ? 140000 : sports ? 32000 : premium ? 24000 : electric ? 22000 : compact ? 8000 : 14000
-  const priceMax = exotic ? 420000 : sports ? 180000 : premium ? 110000 : electric ? 70000 : compact ? 42000 : 65000
-  const doors = bodyType === 'COUPE' || bodyType === 'CONVERTIBLE' ? 2 : 5
-  const seats = bodyType === 'COUPE' || bodyType === 'CONVERTIBLE' ? (sports ? 2 : 4) : 5
-  return { electric, sports, suv, wagon, compact, premium, bodyType, vehicleSize, segment, minPowerHp, maxPowerHp, priceMin, priceMax, doors, seats }
+/**
+ * Typische, community-bekannte Schwachstellen je Baureihe — bewusst vorsichtig
+ * formuliert, in der UI als "nicht verifiziert" gekennzeichnet. Produktion:
+ * TÜV-Report-/DAT-Daten lizenzieren (v0.4).
+ */
+export const modelKnownIssues: Record<string, string[]> = {
+  'Volkswagen Golf GTI': ['Infotainment-Software früher Mk8-Baujahre gilt als fehleranfällig'],
+  'BMW M340i Touring': ['Kühlsystem und Dichtungen im Alter prüfen (B58 sonst als robust bekannt)'],
+  'Porsche 718 Cayman': ['Frontkühler anfällig für Steinschlag — bei Besichtigung prüfen'],
+  'Audi RS6 Avant': ['Hohe Wartungs- und Reifenkosten einplanen; Fahrwerkskomponenten prüfen'],
+  'Mercedes-AMG C63': ['Wartungshistorie kritisch — Vorschäden durch Tuning verbreitet'],
+  'Land Rover Range Rover Sport': ['Luftfahrwerk und Elektronik sind bekannte Kostenpunkte'],
+  'Alfa Romeo Giulia Quadrifoglio': ['Elektronik-Sensibilitäten; dünneres Service-Netz beachten'],
+  'Tesla Model 3 Performance': ['Verarbeitungsqualität streut; hoher Reifenverschleiß'],
+  'Cupra Formentor': ['Infotainment-Software früher Baujahre gilt als fehleranfällig'],
+  'Ford Mustang': ['Hoher Verbrauch; Innenraumqualität unter EU-Niveau'],
 }
-
-function generateCatalogModels(limit = 480): (VehicleModelSeed & { imageUrls: string[] })[] {
-  const generated: (VehicleModelSeed & { imageUrls: string[] })[] = []
-  const existingKeys = new Set(curatedVehicleModelSeeds.map((s) => `${s.make}|${s.model}|${s.variant ?? ''}`.toLowerCase()))
-  outer: for (const entry of catalog) {
-    for (const model of entry.models) {
-      const key = `${entry.make}|${model}|`.toLowerCase()
-      if (existingKeys.has(key)) continue
-      const a = archetypeFor(entry.make, model)
-      generated.push({
-        make: entry.make,
-        model,
-        generation: 'Demo-Katalog',
-        productionStartYear: a.electric ? 2020 : a.sports ? 2016 : 2018,
-        bodyType: a.bodyType,
-        vehicleSize: a.vehicleSize as 'small' | 'compact' | 'midsize' | 'large',
-        segment: a.segment,
-        doors: a.doors,
-        seats: a.seats,
-        drivetrain: a.sports ? 'RWD' : a.suv || a.premium ? 'AWD' : 'FWD',
-        fuelTypes: a.electric ? ['ELECTRIC'] : a.premium || a.suv ? ['PETROL', 'DIESEL', 'HYBRID'] : ['PETROL', 'HYBRID'],
-        transmissionTypes: a.sports || a.compact ? ['MANUAL', 'AUTOMATIC'] : ['AUTOMATIC'],
-        minPowerHp: a.minPowerHp,
-        maxPowerHp: a.maxPowerHp,
-        typicalUsedPriceMin: a.priceMin,
-        typicalUsedPriceMax: a.priceMax,
-        description: `${entry.make} ${model}: Demo-Katalogmodell mit geschätzten Richtwerten für Matching, Monatskosten und Vergleichsansichten.`,
-        strengths: a.electric ? ['niedrige Energiekosten', 'leises Fahren', 'gute Beschleunigung'] : a.sports ? ['Fahrspaß', 'Emotion', 'starke Performance'] : a.suv ? ['hohe Sitzposition', 'Alltag und Familie', 'guter Wiederverkauf'] : ['Alltagstauglichkeit', 'breite Verfügbarkeit', 'gute Vergleichbarkeit'],
-        weaknesses: a.electric ? ['Ladeprofil prüfen', 'Winterreichweite beachten'] : a.sports ? ['Unterhalt und Reifen teuer', 'Versicherung prüfen'] : a.suv ? ['Verbrauch und Reifenkosten', 'Größe in der Stadt'] : ['Ausstattung stark preisabhängig', 'Zustand wichtiger als Modelljahr'],
-        tags: [a.electric ? 'electric' : 'combustion', a.sports ? 'performance' : 'alltag', a.suv ? 'suv' : a.wagon ? 'family' : a.compact ? 'compact' : 'comfort'],
-        imageUrls: img(`${entry.make} ${model}`),
-        specs: {
-          zeroToHundred: a.sports ? 4.2 : a.electric ? 5.8 : a.premium ? 6.2 : 8.8,
-          topSpeed: a.electric ? 210 : a.sports ? 290 : a.premium ? 250 : 205,
-          weightKg: a.suv ? 1900 : a.electric ? 1850 : a.compact ? 1350 : 1650,
-          trunkVolumeL: a.sports ? 180 : a.suv ? 560 : a.wagon ? 560 : a.compact ? 380 : 480,
-          consumptionL100: a.electric ? undefined : a.sports ? 9.8 : a.suv ? 7.8 : 6.2,
-          electricRangeKm: a.electric ? 430 : undefined,
-        },
-      })
-      if (curatedVehicleModelSeeds.length + generated.length >= limit) break outer
-    }
-  }
-  return generated
-}
-
-export const vehicleModelSeeds: (VehicleModelSeed & { imageUrls: string[] })[] = [
-  ...curatedVehicleModelSeeds,
-  ...generateCatalogModels(480),
-]
-

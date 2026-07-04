@@ -62,7 +62,8 @@ describe('Provider-Normalisierung', () => {
     expect(listings.length).toBeGreaterThanOrEqual(20)
     for (const l of listings) {
       expect(l.provider).toBe('demo')
-      expect(l.imagesAreDemo).toBe(true)
+      // entweder Platzhalter (imagesAreDemo) oder frei lizenziertes Foto MIT Attribution
+      expect(l.imagesAreDemo || Boolean(l.imageAttribution)).toBe(true)
       expect(l.price).toBeGreaterThan(0)
     }
   })

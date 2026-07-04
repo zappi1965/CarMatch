@@ -50,19 +50,13 @@ export default function RootLayout() {
         <Stack.Screen name="vehicle/[id]" options={{ title: '' }} />
         <Stack.Screen name="model/[id]" options={{ title: t('taste.findSimilarListings') }} />
         <Stack.Screen name="taste" options={{ presentation: 'modal', title: t('taste.title') }} />
-        <Stack.Screen
-          name="filters"
-          options={{ presentation: 'modal', title: t('filters.title') }}
-        />
-        <Stack.Screen
-          name="location"
-          options={{ presentation: 'modal', title: t('location.title') }}
-        />
+        <Stack.Screen name="duel" options={{ presentation: 'modal', title: t('duel.title') }} />
+        <Stack.Screen name="sell" options={{ presentation: 'modal', title: t('sell.title') }} />
+        <Stack.Screen name="owned-add" options={{ presentation: 'modal', title: t('owned.add') }} />
+        <Stack.Screen name="filters" options={{ presentation: 'modal', title: t('filters.title') }} />
+        <Stack.Screen name="location" options={{ presentation: 'modal', title: t('location.title') }} />
         <Stack.Screen name="auth" options={{ presentation: 'modal', title: t('auth.title') }} />
-        <Stack.Screen
-          name="premium"
-          options={{ presentation: 'modal', title: t('premium.title') }}
-        />
+        <Stack.Screen name="premium" options={{ presentation: 'modal', title: t('premium.title') }} />
         <Stack.Screen name="settings/scores" options={{ title: t('settings.scores') }} />
         <Stack.Screen name="settings/notifications" options={{ title: t('push.title') }} />
         <Stack.Screen name="settings/language" options={{ title: t('settings.language') }} />

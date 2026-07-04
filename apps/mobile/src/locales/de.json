@@ -1,5 +1,10 @@
 {
-  "tabs": { "discover": "Entdecken", "search": "Suche", "garage": "Garage", "settings": "Profil" },
+  "tabs": {
+    "discover": "Entdecken",
+    "search": "Suche",
+    "garage": "Garage",
+    "settings": "Profil"
+  },
   "discover": {
     "title": "Entdecken",
     "empty": "Keine weiteren Fahrzeuge in deinem Umkreis.",
@@ -68,7 +73,11 @@
     "reset": "Zurücksetzen",
     "comingSoon": "Bald verfügbar"
   },
-  "swipeLabels": { "like": "GEFÄLLT MIR", "nope": "WEITER", "dream": "TRAUMWAGEN" },
+  "swipeLabels": {
+    "like": "GEFÄLLT MIR",
+    "nope": "WEITER",
+    "dream": "TRAUMWAGEN"
+  },
   "scores": {
     "title": "Fahrzeug-Scores",
     "performance": "Performance",
@@ -205,15 +214,35 @@
     "onlyAccidentFree": "Nur unfallfrei",
     "onlyServiceHistory": "Nur mit Scheckheft",
     "fuelValues": {
-      "PETROL": "Benzin", "DIESEL": "Diesel", "ELECTRIC": "Elektro", "HYBRID": "Hybrid",
-      "PLUGIN_HYBRID": "Plug-in-Hybrid", "LPG": "Autogas", "CNG": "Erdgas", "OTHER": "Sonstige"
+      "PETROL": "Benzin",
+      "DIESEL": "Diesel",
+      "ELECTRIC": "Elektro",
+      "HYBRID": "Hybrid",
+      "PLUGIN_HYBRID": "Plug-in-Hybrid",
+      "LPG": "Autogas",
+      "CNG": "Erdgas",
+      "OTHER": "Sonstige"
     },
-    "transmissionValues": { "MANUAL": "Schaltgetriebe", "AUTOMATIC": "Automatik", "SEMI_AUTOMATIC": "Halbautomatik" },
+    "transmissionValues": {
+      "MANUAL": "Schaltgetriebe",
+      "AUTOMATIC": "Automatik",
+      "SEMI_AUTOMATIC": "Halbautomatik"
+    },
     "bodyValues": {
-      "SEDAN": "Limousine", "WAGON": "Kombi", "SUV": "SUV", "COUPE": "Coupé",
-      "CONVERTIBLE": "Cabrio", "HATCHBACK": "Kompakt", "VAN": "Van", "PICKUP": "Pickup", "OTHER": "Sonstige"
+      "SEDAN": "Limousine",
+      "WAGON": "Kombi",
+      "SUV": "SUV",
+      "COUPE": "Coupé",
+      "CONVERTIBLE": "Cabrio",
+      "HATCHBACK": "Kompakt",
+      "VAN": "Van",
+      "PICKUP": "Pickup",
+      "OTHER": "Sonstige"
     },
-    "sellerValues": { "DEALER": "Händler", "PRIVATE": "Privat" }
+    "sellerValues": {
+      "DEALER": "Händler",
+      "PRIVATE": "Privat"
+    }
   },
   "location": {
     "title": "Standort",
@@ -238,7 +267,10 @@
     "guestActive": "Du bist als Gast unterwegs",
     "upgradeHint": "Erstelle ein Konto, um Favoriten dauerhaft zu sichern.",
     "logout": "Abmelden",
-    "errors": { "INVALID_CREDENTIALS": "E-Mail oder Passwort falsch.", "EMAIL_TAKEN": "Diese E-Mail ist bereits registriert." }
+    "errors": {
+      "INVALID_CREDENTIALS": "E-Mail oder Passwort falsch.",
+      "EMAIL_TAKEN": "Diese E-Mail ist bereits registriert."
+    }
   },
   "settings": {
     "title": "Profil & Einstellungen",
@@ -295,5 +327,111 @@
     "km": "km",
     "hp": "PS",
     "offline": "Keine Verbindung zum Server."
+  },
+  "costs": {
+    "perMonth": "≈ {{amount}} €/Monat",
+    "title": "Monatliche Kosten (Schätzung)",
+    "depreciation": "Wertverlust",
+    "fuel": "Kraftstoff/Strom",
+    "insurance": "Versicherung",
+    "tax": "Kfz-Steuer",
+    "maintenance": "Wartung",
+    "total": "Gesamt",
+    "assumption": "Annahme: {{km}} km/Jahr · grobe Richtwerte, keine Garantie",
+    "budgetFilter": "Max. Monatskosten (€)"
+  },
+  "duel": {
+    "title": "Auto-Duell",
+    "subtitle": "Welches passt besser zu dir? Tippe dein Auto an.",
+    "entry": "Duell",
+    "decided": "Gespeichert — dein Profil lernt.",
+    "next": "Nächstes Duell"
+  },
+  "circle": {
+    "title": "Gemeinsam suchen",
+    "hint": "Sucht zu zweit oder als Familie: Favoriten werden verglichen, Übereinstimmungen sind eure Matches.",
+    "create": "Gruppe erstellen",
+    "namePlaceholder": "Name, z. B. »Unser nächstes Auto«",
+    "join": "Mit Code beitreten",
+    "codePlaceholder": "Einladungscode",
+    "inviteCode": "Einladungscode: {{code}}",
+    "members": "{{count}} Mitglieder",
+    "matches": "Ihr mögt beide",
+    "partnerPicks": "Favoriten der anderen",
+    "noMatches": "Noch keine gemeinsamen Matches — swiped weiter!",
+    "leave": "Gruppe verlassen"
+  },
+  "goals": {
+    "title": "Sparziele",
+    "add": "Als Sparziel speichern",
+    "added": "Sparziel angelegt.",
+    "target": "Zielpreis",
+    "budget": "Aktuelles Budget (€)",
+    "monthly": "Sparrate €/Monat",
+    "forecast": "Bei {{monthly}} €/Monat erreichbar in ~{{months}} Monaten",
+    "forecastNow": "Dein Budget reicht bereits!",
+    "forecastNever": "Mit dieser Sparrate in 5 Jahren nicht erreichbar",
+    "trendDown": "Preise fallen ({{percent}} %/Vergleich) — das spielt dir zu",
+    "empty": "Kein Sparziel — speichere einen Traumwagen, der noch zu teuer ist."
+  },
+  "owned": {
+    "title": "Mein Auto",
+    "add": "Auto hinzufügen",
+    "currentValue": "Aktueller Marktwert",
+    "noEstimate": "Zu wenige Vergleichsdaten für eine Schätzung",
+    "inspectionDue": "TÜV bald fällig!",
+    "purchase": "Kaufpreis",
+    "delta": "Wertentwicklung seit Kauf",
+    "form": {
+      "make": "Marke",
+      "model": "Modell",
+      "year": "Baujahr",
+      "mileage": "Kilometerstand",
+      "power": "PS (optional)",
+      "price": "Kaufpreis € (optional)",
+      "inspection": "TÜV bis (JJJJ-MM)"
+    }
+  },
+  "sell": {
+    "title": "Auto verkaufen",
+    "subtitle": "Was ist dein Auto wert? Schätzung auf Basis vergleichbarer Inserate.",
+    "estimate": "Wert schätzen",
+    "estimateResult": "Geschätzter Wert",
+    "range": "Spanne: {{low}} – {{high}}",
+    "basis": "Basis: {{count}} Vergleichsinserate · Konfidenz {{confidence}} %",
+    "noEstimate": "Zu wenige Vergleichsdaten — wir können aktuell keine seriöse Schätzung abgeben.",
+    "requestOffers": "Ankauf-Angebote erhalten",
+    "requested": "Anfrage gespeichert. Händler-Angebote folgen, sobald Partner angebunden sind.",
+    "demoNote": "Demo-Modus: Schätzung basiert auf Demo-Inseraten."
+  },
+  "ev": {
+    "title": "E-Auto-Alltagscheck",
+    "dailyKm": "Tägliche Strecke (km)",
+    "homeCharging": "Ich kann zu Hause laden",
+    "check": "Prüfen",
+    "FITS": "Passt zu deinem Alltag",
+    "TIGHT": "Machbar, aber knapp",
+    "CHALLENGING": "Wird im Alltag anstrengend",
+    "detail": "Nutzbare Reichweite ~{{range}} km · ~{{charges}} Ladevorgänge/Woche"
+  },
+  "trend": {
+    "title": "Markttrend",
+    "FALLING": "Preise fallen ({{percent}} %)",
+    "RISING": "Preise steigen (+{{percent}} %)",
+    "STABLE": "Preise stabil",
+    "UNKNOWN": "Zu wenige Daten für einen Trend",
+    "WINTER_CONVERTIBLE": "Tipp: Cabrios sind im Winter oft günstiger",
+    "SPRING_SUV": "Hinweis: SUV-Nachfrage zieht im Frühjahr an"
+  },
+  "model": {
+    "knownIssues": "Bekannte Schwachstellen (nicht verifiziert)",
+    "reviews": "Besitzer-Stimmen",
+    "writeReview": "Bewertung schreiben",
+    "isOwner": "Ich besitze/besass dieses Modell",
+    "reviewPlaceholder": "Deine Erfahrung…",
+    "noReviews": "Noch keine Bewertungen — sei die/der Erste."
+  },
+  "attribution": {
+    "photo": "{{text}} · Quelle öffnen"
   }
 }

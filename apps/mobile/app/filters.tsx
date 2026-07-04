@@ -27,10 +27,7 @@ export default function FiltersScreen() {
   const numField = (key: keyof VehicleFilters) => ({
     value: draft[key] != null ? String(draft[key]) : '',
     onChangeText: (text: string) =>
-      setDraft({
-        ...draft,
-        [key]: text ? Number(text.replace(/\D/g, '')) || undefined : undefined,
-      }),
+      setDraft({ ...draft, [key]: text ? Number(text.replace(/\D/g, '')) || undefined : undefined }),
   })
 
   return (
@@ -38,118 +35,59 @@ export default function FiltersScreen() {
       <ScrollView contentContainerStyle={{ padding: spacing(4), gap: spacing(4) }}>
         <Group label={t('filters.price')}>
           <View style={styles.pair}>
-            <TextInput
-              style={styles.input}
-              keyboardType="numeric"
-              placeholder={t('filters.min')}
-              placeholderTextColor={colors.textFaint}
-              {...numField('priceMin')}
-            />
-            <TextInput
-              style={styles.input}
-              keyboardType="numeric"
-              placeholder={t('filters.max')}
-              placeholderTextColor={colors.textFaint}
-              {...numField('priceMax')}
-            />
+            <TextInput style={styles.input} keyboardType="numeric" placeholder={t('filters.min')} placeholderTextColor={colors.textFaint} {...numField('priceMin')} />
+            <TextInput style={styles.input} keyboardType="numeric" placeholder={t('filters.max')} placeholderTextColor={colors.textFaint} {...numField('priceMax')} />
           </View>
+        </Group>
+
+        <Group label={t('costs.budgetFilter')}>
+          <TextInput
+            style={styles.input}
+            keyboardType="numeric"
+            placeholder="z. B. 450"
+            placeholderTextColor={colors.textFaint}
+            {...numField('monthlyBudgetMax')}
+          />
         </Group>
 
         <Group label={t('filters.year')}>
           <View style={styles.pair}>
-            <TextInput
-              style={styles.input}
-              keyboardType="numeric"
-              placeholder={t('filters.min')}
-              placeholderTextColor={colors.textFaint}
-              {...numField('yearMin')}
-            />
-            <TextInput
-              style={styles.input}
-              keyboardType="numeric"
-              placeholder={t('filters.max')}
-              placeholderTextColor={colors.textFaint}
-              {...numField('yearMax')}
-            />
+            <TextInput style={styles.input} keyboardType="numeric" placeholder={t('filters.min')} placeholderTextColor={colors.textFaint} {...numField('yearMin')} />
+            <TextInput style={styles.input} keyboardType="numeric" placeholder={t('filters.max')} placeholderTextColor={colors.textFaint} {...numField('yearMax')} />
           </View>
         </Group>
 
         <Group label={t('filters.mileage')}>
           <View style={styles.pair}>
-            <TextInput
-              style={styles.input}
-              keyboardType="numeric"
-              placeholder={t('filters.min')}
-              placeholderTextColor={colors.textFaint}
-              {...numField('mileageMin')}
-            />
-            <TextInput
-              style={styles.input}
-              keyboardType="numeric"
-              placeholder={t('filters.max')}
-              placeholderTextColor={colors.textFaint}
-              {...numField('mileageMax')}
-            />
+            <TextInput style={styles.input} keyboardType="numeric" placeholder={t('filters.min')} placeholderTextColor={colors.textFaint} {...numField('mileageMin')} />
+            <TextInput style={styles.input} keyboardType="numeric" placeholder={t('filters.max')} placeholderTextColor={colors.textFaint} {...numField('mileageMax')} />
           </View>
         </Group>
 
         <Group label={t('filters.power')}>
           <View style={styles.pair}>
-            <TextInput
-              style={styles.input}
-              keyboardType="numeric"
-              placeholder={t('filters.min')}
-              placeholderTextColor={colors.textFaint}
-              {...numField('powerHpMin')}
-            />
-            <TextInput
-              style={styles.input}
-              keyboardType="numeric"
-              placeholder={t('filters.max')}
-              placeholderTextColor={colors.textFaint}
-              {...numField('powerHpMax')}
-            />
+            <TextInput style={styles.input} keyboardType="numeric" placeholder={t('filters.min')} placeholderTextColor={colors.textFaint} {...numField('powerHpMin')} />
+            <TextInput style={styles.input} keyboardType="numeric" placeholder={t('filters.max')} placeholderTextColor={colors.textFaint} {...numField('powerHpMax')} />
           </View>
         </Group>
 
         <Group label={t('filters.fuelTypes')}>
-          <ChipRow
-            options={FUELS}
-            selected={draft.fuelTypes ?? []}
-            onToggle={(v) => toggle('fuelTypes', v)}
-            i18nPrefix="filters.fuelValues"
-          />
+          <ChipRow options={FUELS} selected={draft.fuelTypes ?? []} onToggle={(v) => toggle('fuelTypes', v)} i18nPrefix="filters.fuelValues" />
         </Group>
 
         <Group label={t('filters.transmission')}>
-          <ChipRow
-            options={TRANSMISSIONS}
-            selected={draft.transmissions ?? []}
-            onToggle={(v) => toggle('transmissions', v)}
-            i18nPrefix="filters.transmissionValues"
-          />
+          <ChipRow options={TRANSMISSIONS} selected={draft.transmissions ?? []} onToggle={(v) => toggle('transmissions', v)} i18nPrefix="filters.transmissionValues" />
         </Group>
 
         <Group label={t('filters.bodyTypes')}>
-          <ChipRow
-            options={BODIES}
-            selected={draft.bodyTypes ?? []}
-            onToggle={(v) => toggle('bodyTypes', v)}
-            i18nPrefix="filters.bodyValues"
-          />
+          <ChipRow options={BODIES} selected={draft.bodyTypes ?? []} onToggle={(v) => toggle('bodyTypes', v)} i18nPrefix="filters.bodyValues" />
         </Group>
 
         <Group label={t('filters.sellerType')}>
           <ChipRow
             options={['DEALER', 'PRIVATE']}
             selected={draft.sellerType ? [draft.sellerType] : []}
-            onToggle={(v) =>
-              setDraft({
-                ...draft,
-                sellerType:
-                  draft.sellerType === v ? undefined : (v as VehicleFilters['sellerType']),
-              })
-            }
+            onToggle={(v) => setDraft({ ...draft, sellerType: draft.sellerType === v ? undefined : (v as VehicleFilters['sellerType']) })}
             i18nPrefix="filters.sellerValues"
           />
         </Group>
@@ -167,12 +105,7 @@ export default function FiltersScreen() {
       </ScrollView>
 
       <View style={styles.footer}>
-        <CTAButton
-          label={t('actions.reset')}
-          variant="ghost"
-          onPress={() => setDraft({})}
-          style={{ flex: 1 }}
-        />
+        <CTAButton label={t('actions.reset')} variant="ghost" onPress={() => setDraft({})} style={{ flex: 1 }} />
         <CTAButton
           label={t('actions.apply')}
           onPress={() => {
@@ -189,19 +122,14 @@ export default function FiltersScreen() {
 function Group({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <View>
-      <Text style={[typography.label, { color: colors.textMuted, marginBottom: spacing(2) }]}>
-        {label}
-      </Text>
+      <Text style={[typography.label, { color: colors.textMuted, marginBottom: spacing(2) }]}>{label}</Text>
       {children}
     </View>
   )
 }
 
 function ChipRow({
-  options,
-  selected,
-  onToggle,
-  i18nPrefix,
+  options, selected, onToggle, i18nPrefix,
 }: {
   options: readonly string[]
   selected: string[]
@@ -227,23 +155,11 @@ function ChipRow({
   )
 }
 
-function ToggleRow({
-  label,
-  value,
-  onChange,
-}: {
-  label: string
-  value: boolean
-  onChange: (v: boolean) => void
-}) {
+function ToggleRow({ label, value, onChange }: { label: string; value: boolean; onChange: (v: boolean) => void }) {
   return (
     <View style={styles.toggleRow}>
       <Text style={[typography.body, { color: colors.text }]}>{label}</Text>
-      <Switch
-        value={value}
-        onValueChange={onChange}
-        trackColor={{ true: colors.like, false: colors.cardBorder }}
-      />
+      <Switch value={value} onValueChange={onChange} trackColor={{ true: colors.like, false: colors.cardBorder }} />
     </View>
   )
 }

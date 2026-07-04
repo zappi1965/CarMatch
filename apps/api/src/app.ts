@@ -18,13 +18,10 @@ import { modelSwipeRoutes } from './routes/modelSwipes.js'
 import { tasteProfileRoutes } from './routes/tasteProfile.js'
 import { discoveryRoutes } from './routes/discovery.js'
 import { duelRoutes } from './routes/duels.js'
-import { budgetRoutes } from './routes/budget.js'
-import { marketTimingRoutes } from './routes/marketTiming.js'
-import { sharedSearchRoutesV2 } from './routes/sharedSearches.js'
-import { sellerRoutes } from './routes/seller.js'
-import { ownedGarageRoutes } from './routes/ownedGarage.js'
-import { evCheckRoutes } from './routes/evCheck.js'
-import { buyingAssistantRoutes } from './routes/buyingAssistant.js'
+import { circleRoutes } from './routes/circles.js'
+import { garagePlusRoutes } from './routes/garagePlus.js'
+import { sellRoutes } from './routes/sell.js'
+import { marketRoutes } from './routes/market.js'
 
 export async function buildApp() {
   const app = Fastify({ logger: config.NODE_ENV !== 'test' })
@@ -59,15 +56,12 @@ export async function buildApp() {
   await app.register(modelSwipeRoutes, { prefix: '/model-swipes' })
   await app.register(tasteProfileRoutes, { prefix: '/taste-profile' })
   await app.register(discoveryRoutes, { prefix: '/discovery' })
+  // Erweiterungen: Duell, gemeinsame Suche, Sparziele/Besitz, C2B, Markttrend
   await app.register(duelRoutes, { prefix: '/duels' })
-  await app.register(budgetRoutes, { prefix: '/budget' })
-  await app.register(marketTimingRoutes, { prefix: '/market-timing' })
-  await app.register(sharedSearchRoutesV2, { prefix: '/shared-searches' })
-  await app.register(sharedSearchRoutesV2, { prefix: '/shared-searches-v2' })
-  await app.register(sellerRoutes, { prefix: '/seller' })
-  await app.register(ownedGarageRoutes, { prefix: '/owned-garage' })
-  await app.register(evCheckRoutes, { prefix: '/ev-check' })
-  await app.register(buyingAssistantRoutes, { prefix: '/buying-assistant' })
+  await app.register(circleRoutes, { prefix: '/circles' })
+  await app.register(garagePlusRoutes, { prefix: '/garage' })
+  await app.register(sellRoutes, { prefix: '/sell' })
+  await app.register(marketRoutes, { prefix: '/market' })
 
   return app
 }

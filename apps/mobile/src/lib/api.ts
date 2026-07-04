@@ -1,8 +1,12 @@
 import Constants from 'expo-constants'
 import { useSession } from './store'
 
+// Build-Konfiguration (EAS): EXPO_PUBLIC_API_URL wird zur Buildzeit eingebettet.
+// Entwicklung: extra.apiUrl aus app.json (localhost).
 const API_URL: string =
-  (Constants.expoConfig?.extra?.apiUrl as string | undefined) ?? 'http://localhost:4100'
+  process.env.EXPO_PUBLIC_API_URL ??
+  (Constants.expoConfig?.extra?.apiUrl as string | undefined) ??
+  'http://localhost:4100'
 
 export class ApiError extends Error {
   constructor(

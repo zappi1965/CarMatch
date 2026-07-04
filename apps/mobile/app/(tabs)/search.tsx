@@ -9,14 +9,7 @@ import { colors, radius, spacing, typography } from '../../src/lib/theme'
 import { formatKm, formatPrice, type ListingDto } from '../../src/lib/types'
 import { Badge, CTAButton, EmptyState, LoadingState } from '../../src/components/ui'
 
-const SORTS: SearchSort[] = [
-  'RELEVANCE',
-  'PRICE_ASC',
-  'PRICE_DESC',
-  'DISTANCE',
-  'NEWEST',
-  'MILEAGE',
-]
+const SORTS: SearchSort[] = ['RELEVANCE', 'PRICE_ASC', 'PRICE_DESC', 'DISTANCE', 'NEWEST', 'MILEAGE']
 
 /** Klassische Suche mit Volltext (Marke/Modell), Filtern und Sortierung. */
 export default function SearchScreen() {
@@ -39,9 +32,7 @@ export default function SearchScreen() {
         sort,
         ...filters,
       })
-      const data = await api.get<Array<ListingDto & { distanceKm?: number }>>(
-        `/vehicles/search${q}`,
-      )
+      const data = await api.get<Array<ListingDto & { distanceKm?: number }>>(`/vehicles/search${q}`)
       setResults(data)
     } catch {
       setResults([])
@@ -68,20 +59,14 @@ export default function SearchScreen() {
           {SORTS.map((s) => (
             <Pressable key={s} onPress={() => setSort(s)}>
               <View style={[styles.chip, sort === s && styles.chipActive]}>
-                <Text
-                  style={[typography.badge, { color: sort === s ? colors.text : colors.textMuted }]}
-                >
+                <Text style={[typography.badge, { color: sort === s ? colors.text : colors.textMuted }]}>
                   {t(`search.sortOptions.${s}`)}
                 </Text>
               </View>
             </Pressable>
           ))}
         </View>
-        <CTAButton
-          label={t('filters.title')}
-          variant="secondary"
-          onPress={() => router.push('/filters')}
-        />
+        <CTAButton label={t('filters.title')} variant="secondary" onPress={() => router.push('/filters')} />
       </View>
 
       {results === null ? (
@@ -105,21 +90,15 @@ export default function SearchScreen() {
             >
               <Image source={{ uri: item.images[0] }} style={styles.thumb} />
               <View style={{ flex: 1, padding: spacing(3) }}>
-                <Text
-                  style={[typography.body, { color: colors.text, fontWeight: '700' }]}
-                  numberOfLines={1}
-                >
+                <Text style={[typography.body, { color: colors.text, fontWeight: '700' }]} numberOfLines={1}>
                   {item.title}
                 </Text>
                 <Text style={[typography.body, { color: colors.gold, fontWeight: '700' }]}>
                   {formatPrice(item.price, item.currency)}
                 </Text>
                 <Text style={[typography.badge, { color: colors.textFaint, marginTop: 2 }]}>
-                  {item.year ?? '–'} · {formatKm(item.mileage)} · {item.powerHp ?? '–'}{' '}
-                  {t('common.hp')}
-                  {item.distanceKm != null && Number.isFinite(item.distanceKm)
-                    ? ` · ${item.distanceKm} km`
-                    : ''}
+                  {item.year ?? '–'} · {formatKm(item.mileage)} · {item.powerHp ?? '–'} {t('common.hp')}
+                  {item.distanceKm != null && Number.isFinite(item.distanceKm) ? ` · ${item.distanceKm} km` : ''}
                 </Text>
                 {item.imagesAreDemo ? (
                   <View style={{ flexDirection: 'row', marginTop: spacing(1.5) }}>

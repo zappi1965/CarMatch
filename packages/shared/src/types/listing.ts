@@ -72,6 +72,8 @@ export interface NormalizedListing {
   images: string[]
   /** true, wenn Bilder Demo-Platzhalter sind (Kennzeichnungspflicht in der UI). */
   imagesAreDemo?: boolean
+  /** Bildnachweis, z. B. "Foto: Wikimedia Commons" (Pflicht bei CC-Fotos). */
+  imageAttribution?: string
   sellerType: SellerType
   dealerName?: string
   latitude?: number

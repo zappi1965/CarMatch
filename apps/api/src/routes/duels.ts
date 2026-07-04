@@ -1,119 +1,62 @@
 import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 import { prisma } from '../db.js'
-import { calculateMonthlyOwnershipCost } from '../services/kaufhilfe/monthlyCost.js'
-import { updateProfileFromSwipe } from '../services/recommendationService.js'
+import { recalculateTasteProfile } from '../services/tasteProfileService.js'
+import { track } from '../services/analyticsService.js'
 
-function withCost(listing: any, budget?: number | null) {
-  return {
-    ...listing,
-    rawData: undefined,
-    monthlyCost: calculateMonthlyOwnershipCost({
-      price: listing.price,
-      year: listing.year,
-      mileage: listing.mileage,
-      powerHp: listing.powerHp,
-      fuelType: listing.fuelType,
-      consumptionL100: listing.consumptionL100 ?? listing.specs?.consumptionL100,
-      energyConsumptionKwh100: listing.specs?.consumptionL100,
-      co2GKm: listing.co2GKm,
-      displacementCcm: listing.displacementCcm,
-      bodyType: listing.bodyType,
-      userMonthlyBudgetEur: budget,
-    }),
-  }
-}
-
+/**
+ * Duell-Modus: zwei Fahrzeugmodelle, Nutzer wählt eins.
+ * Paarvergleiche liefern pro Interaktion mehr Präferenz-Information
+ * als Einzel-Swipes (Gewichte: Sieger +6, Verlierer −2, siehe taste.ts).
+ */
 export async function duelRoutes(app: FastifyInstance) {
-  async function nextPair(req: any, reply: any) {
-    const user = await prisma.user.findUnique({ where: { id: req.user.sub } })
-    const rows = await prisma.vehicleListing.findMany({
-      where: { isAvailable: true },
-      include: { specs: true },
-      orderBy: [{ qualityScore: 'desc' }, { createdAt: 'desc' }],
-      take: 80,
+  /** Nächstes Duell-Paar: bevorzugt vergleichbare Preisklasse, sonst divers. */
+  app.get('/next', { preHandler: [app.authenticate] }, async (req, reply) => {
+    const models = await prisma.vehicleModel.findMany({ include: { specs: true } })
+    if (models.length < 2) return reply.code(404).send({ ok: false, error: 'NOT_ENOUGH_MODELS' })
+
+    // zuletzt duellierte Paare vermeiden
+    const recent = await prisma.duelEvent.findMany({
+      where: { userId: req.user.sub },
+      orderBy: { createdAt: 'desc' },
+      take: 10,
     })
-    const pool = rows.sort(() => Math.random() - 0.5).slice(0, 2)
-    if (pool.length < 2) {
-      return reply.code(404).send({ ok: false, error: 'NOT_ENOUGH_LISTINGS_FOR_DUEL' })
-    }
-    return {
-      ok: true,
-      data: {
-        left: withCost(pool[0], user?.monthlyBudgetEur),
-        right: withCost(pool[1], user?.monthlyBudgetEur),
-      },
-    }
-  }
+    const recentIds = new Set(recent.flatMap((d) => [d.winnerModelId, d.loserModelId]))
+    const pool = models.filter((m) => !recentIds.has(m.id))
+    const source = pool.length >= 2 ? pool : models
 
-  app.get('/next', { preHandler: [app.authenticate] }, nextPair)
-  // Alias für die neue Demo-UI und spätere semantische API.
-  app.get('/pair', { preHandler: [app.authenticate] }, nextPair)
-
-  app.post('/vote', { preHandler: [app.authenticate] }, async (req) => {
-    const body = z
-      .object({
-        winnerListingId: z.string().optional(),
-        loserListingId: z.string().optional(),
-        // UI-Alias: in der App werden Inserate als Vehicles bezeichnet.
-        winnerVehicleId: z.string().optional(),
-        loserVehicleId: z.string().optional(),
-        bothUninteresting: z.boolean().optional(),
-      })
-      .parse(req.body)
-
-    const winnerListingId = body.winnerListingId ?? body.winnerVehicleId
-    const loserListingId = body.loserListingId ?? body.loserVehicleId
-
-    if (body.bothUninteresting && winnerListingId && loserListingId) {
-      await prisma.swipeEvent.createMany({
-        data: [winnerListingId, loserListingId].map((listingId) => ({
-          userId: req.user.sub,
-          listingId,
-          action: 'SKIP' as const,
-        })),
-      })
-      return { ok: true, data: { skipped: true } }
-    }
-
-    if (!winnerListingId || !loserListingId) {
-      return { ok: false, error: 'WINNER_AND_LOSER_REQUIRED' }
-    }
-
-    const signal = await prisma.duelSignal.create({
-      data: { userId: req.user.sub, winnerListingId, loserListingId, weight: 3.5 },
+    const a = source[Math.floor(Math.random() * source.length)]!
+    // Gegner: ähnliche Preisklasse (Faktor < 2.5), damit das Duell fair bleibt
+    const priceMid = (m: typeof a) =>
+      m.typicalUsedPriceMin != null && m.typicalUsedPriceMax != null
+        ? (m.typicalUsedPriceMin + m.typicalUsedPriceMax) / 2
+        : null
+    const aPrice = priceMid(a)
+    const opponents = source.filter((m) => {
+      if (m.id === a.id) return false
+      const p = priceMid(m)
+      if (aPrice == null || p == null) return true
+      const ratio = Math.max(aPrice, p) / Math.min(aPrice, p)
+      return ratio <= 2.5
     })
-    // Paarvergleich zusätzlich als starke LIKE/DISLIKE-Signale in das bestehende Profil einspeisen.
-    const winSwipe = await prisma.swipeEvent.create({
-      data: {
-        userId: req.user.sub,
-        listingId: winnerListingId,
-        action: 'SUPERLIKE',
-        dwellTimeMs: 3500,
-      },
-    })
-    const loseSwipe = await prisma.swipeEvent.create({
-      data: {
-        userId: req.user.sub,
-        listingId: loserListingId,
-        action: 'DISLIKE',
-        dwellTimeMs: 3500,
-      },
-    })
-    await updateProfileFromSwipe(req.user.sub, winSwipe.id)
-    await updateProfileFromSwipe(req.user.sub, loseSwipe.id)
-    return { ok: true, data: signal }
+    const b = (opponents.length > 0 ? opponents : source.filter((m) => m.id !== a.id))[
+      Math.floor(Math.random() * (opponents.length > 0 ? opponents.length : source.length - 1))
+    ]!
+    return { ok: true, data: { a, b } }
   })
 
-  app.post('/skip', { preHandler: [app.authenticate] }, async (req) => {
-    const body = z.object({ leftListingId: z.string(), rightListingId: z.string() }).parse(req.body)
-    await prisma.swipeEvent.createMany({
-      data: [body.leftListingId, body.rightListingId].map((listingId) => ({
-        userId: req.user.sub,
-        listingId,
-        action: 'SKIP' as const,
-      })),
+  app.post('/', { preHandler: [app.authenticate] }, async (req, reply) => {
+    const body = z.object({ winnerModelId: z.string(), loserModelId: z.string() }).parse(req.body)
+    if (body.winnerModelId === body.loserModelId)
+      return reply.code(400).send({ ok: false, error: 'SAME_MODEL' })
+    const count = await prisma.vehicleModel.count({
+      where: { id: { in: [body.winnerModelId, body.loserModelId] } },
     })
-    return { ok: true, data: { skipped: true } }
+    if (count !== 2) return reply.code(404).send({ ok: false, error: 'MODEL_NOT_FOUND' })
+
+    await prisma.duelEvent.create({ data: { userId: req.user.sub, ...body } })
+    const profile = await recalculateTasteProfile(req.user.sub)
+    await track('duel_decided', req.user.sub)
+    return { ok: true, data: { signalCount: profile.signalCount, confidence: profile.confidence } }
   })
 }

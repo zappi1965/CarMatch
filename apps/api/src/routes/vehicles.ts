@@ -5,6 +5,8 @@ import { prisma } from '../db.js'
 import { discover } from '../services/recommendationService.js'
 import { buildWhere, geoWhere, filterByExactRadius, getListingWithInsights } from '../services/vehicleService.js'
 import { geocoder } from '../geo/geocoding.js'
+import { estimateMonthlyCosts } from '../scores/monthlyCosts.js'
+import { evCheck } from '../scores/evCheck.js'
 import { track } from '../services/analyticsService.js'
 
 const locationSchema = z.object({
@@ -65,18 +67,57 @@ async function resolvePoint(loc: z.infer<typeof locationSchema>) {
 }
 
 export async function vehicleRoutes(app: FastifyInstance) {
-  /** Discovery-Feed für das Swipen — personalisiert, umkreisbasiert. */
+  /** Discovery-Feed für das Swipen — personalisiert, umkreisbasiert.
+   *  Optional monthlyBudgetMax: filtert nach geschätzten Gesamtkosten/Monat. */
   app.get('/discover', { preHandler: [app.authenticate] }, async (req) => {
-    const q = locationSchema.merge(filtersSchema).merge(z.object({ limit: z.coerce.number().max(50).optional() })).parse(req.query)
+    const q = locationSchema
+      .merge(filtersSchema)
+      .merge(z.object({ limit: z.coerce.number().max(50).optional(), monthlyBudgetMax: z.coerce.number().positive().optional() }))
+      .parse(req.query)
     const point = await resolvePoint(q)
+    const limit = q.limit ?? 20
     const results = await discover({
       userId: req.user.sub,
       point,
       radiusKm: q.radiusKm ?? null,
       filters: parseFilters(q),
-      limit: q.limit ?? 20,
+      // Budget-Filter reduziert nachträglich → mehr Kandidaten anfordern
+      limit: q.monthlyBudgetMax != null ? limit * 2 : limit,
     })
-    return { ok: true, data: results }
+    const withCosts = results.map((r) => ({
+      ...r,
+      monthlyCosts: estimateMonthlyCosts({
+        price: r.listing.price,
+        year: r.listing.year,
+        mileage: r.listing.mileage,
+        powerHp: r.listing.powerHp,
+        fuelType: r.listing.fuelType,
+        consumptionL100: r.listing.consumptionL100,
+        displacementCcm: r.listing.displacementCcm,
+        co2GKm: r.listing.co2GKm,
+      }),
+    }))
+    const filtered =
+      q.monthlyBudgetMax != null
+        ? withCosts.filter((r) => r.monthlyCosts.total <= q.monthlyBudgetMax!)
+        : withCosts
+    return { ok: true, data: filtered.slice(0, limit) }
+  })
+
+  /** E-Auto-Alltagscheck: passt die Reichweite zum Pendel-Alltag? */
+  app.get('/:id/ev-check', async (req, reply) => {
+    const { id } = z.object({ id: z.string() }).parse(req.params)
+    const q = z
+      .object({ dailyKm: z.coerce.number().positive().max(1000), homeCharging: z.coerce.boolean().default(false) })
+      .parse(req.query)
+    const listing = await prisma.vehicleListing.findUnique({ where: { id }, include: { specs: true } })
+    if (!listing) return reply.code(404).send({ ok: false, error: 'NOT_FOUND' })
+    if (listing.fuelType !== 'ELECTRIC' && listing.fuelType !== 'PLUGIN_HYBRID')
+      return reply.code(400).send({ ok: false, error: 'NOT_ELECTRIC' })
+    const range = listing.specs?.electricRangeKm
+    if (range == null)
+      return { ok: true, data: { verdict: 'UNKNOWN', reason: 'RANGE_DATA_MISSING' } }
+    return { ok: true, data: evCheck({ electricRangeKm: range, dailyKm: q.dailyKm, homeCharging: q.homeCharging }) }
   })
 
   /** Klassische Suche mit Filtern und Sortierung. */
@@ -160,7 +201,7 @@ export async function vehicleRoutes(app: FastifyInstance) {
     const { id } = z.object({ id: z.string() }).parse(req.params)
     const q = locationSchema.parse(req.query)
     const point = await resolvePoint(q)
-    const listing = await getListingWithInsights(id, point, req.user?.sub)
+    const listing = await getListingWithInsights(id, point)
     if (!listing) return reply.code(404).send({ ok: false, error: 'NOT_FOUND' })
     await track('detail_open', undefined, { listingId: id })
     return { ok: true, data: listing }

@@ -97,9 +97,7 @@ export default function DiscoverScreen() {
         if (next.length <= 3) void loadListings()
         return next
       })
-      void api
-        .post('/swipes', { listingId: item.listing.id, action, dwellTimeMs, openedMore })
-        .catch(() => {})
+      void api.post('/swipes', { listingId: item.listing.id, action, dwellTimeMs, openedMore }).catch(() => {})
     },
     [loadListings],
   )
@@ -114,10 +112,7 @@ export default function DiscoverScreen() {
       setModelSwipeCount((c) => c + 1)
       void api
         .post<{ summaryReady: boolean }>('/model-swipes', {
-          vehicleModelId: model.id,
-          action,
-          dwellTimeMs,
-          openedMore,
+          vehicleModelId: model.id, action, dwellTimeMs, openedMore,
         })
         .then((d) => setSummaryReady(d.summaryReady))
         .catch(() => {})
@@ -152,10 +147,8 @@ export default function DiscoverScreen() {
   const translateExplanation = useCallback(
     (item: DiscoverItem) => {
       const params = { ...item.explanation.params } as Record<string, string>
-      if (params.bodyType)
-        params.bodyType = t(`filters.bodyValues.${params.bodyType}`, params.bodyType)
-      if (params.fuelType)
-        params.fuelType = t(`filters.fuelValues.${params.fuelType}`, params.fuelType)
+      if (params.bodyType) params.bodyType = t(`filters.bodyValues.${params.bodyType}`, params.bodyType)
+      if (params.fuelType) params.fuelType = t(`filters.fuelValues.${params.fuelType}`, params.fuelType)
       return t(item.explanation.key, params)
     },
     [t],
@@ -164,9 +157,7 @@ export default function DiscoverScreen() {
   // ── Mode-Selector ──
   if (mode === null) {
     return (
-      <View
-        style={[styles.screen, { padding: spacing(5), justifyContent: 'center', gap: spacing(4) }]}
-      >
+      <View style={[styles.screen, { padding: spacing(5), justifyContent: 'center', gap: spacing(4) }]}>
         <Text style={[typography.display, { color: colors.text, marginBottom: spacing(2) }]}>
           {t('mode.title')}
         </Text>
@@ -202,34 +193,27 @@ export default function DiscoverScreen() {
       {/* Kopfzeile: Modus-Umschalter + Standort/Filter */}
       <View style={styles.toolbar}>
         <View style={styles.segment}>
-          <SegmentButton
-            label={t('mode.switchInspiration')}
-            active={isInspiration}
-            onPress={() => selectMode('inspiration')}
-          />
-          <SegmentButton
-            label={t('mode.switchListings')}
-            active={!isInspiration}
-            onPress={() => selectMode('listings')}
-          />
+          <SegmentButton label={t('mode.switchInspiration')} active={isInspiration} onPress={() => selectMode('inspiration')} />
+          <SegmentButton label={t('mode.switchListings')} active={!isInspiration} onPress={() => selectMode('listings')} />
         </View>
         {!isInspiration ? (
           <View style={{ flexDirection: 'row', gap: spacing(3) }}>
             <Pressable onPress={() => router.push('/location')} hitSlop={8}>
-              <Text style={[typography.badge, { color: colors.textMuted }]}>
-                ⌖ {location.city ?? t('location.title')}
-              </Text>
+              <Text style={[typography.badge, { color: colors.textMuted }]}>⌖ {location.city ?? t('location.title')}</Text>
             </Pressable>
             <Pressable onPress={() => router.push('/filters')} hitSlop={8}>
-              <Text style={[typography.badge, { color: colors.textMuted }]}>
-                {t('filters.title')} ⛭
-              </Text>
+              <Text style={[typography.badge, { color: colors.textMuted }]}>{t('filters.title')} ⛭</Text>
             </Pressable>
           </View>
         ) : (
-          <Pressable onPress={() => router.push('/taste')} hitSlop={8}>
-            <Text style={[typography.badge, { color: colors.gold }]}>{t('taste.title')} ›</Text>
-          </Pressable>
+          <View style={{ flexDirection: 'row', gap: spacing(3) }}>
+            <Pressable onPress={() => router.push('/duel')} hitSlop={8}>
+              <Text style={[typography.badge, { color: colors.info }]}>⚔ {t('duel.entry')}</Text>
+            </Pressable>
+            <Pressable onPress={() => router.push('/taste')} hitSlop={8}>
+              <Text style={[typography.badge, { color: colors.gold }]}>{t('taste.title')} ›</Text>
+            </Pressable>
+          </View>
         )}
       </View>
 
@@ -240,9 +224,7 @@ export default function DiscoverScreen() {
             <Text style={[typography.body, { color: colors.text, fontWeight: '600' }]}>
               ✦ {t('taste.summaryReady')}
             </Text>
-            <Text style={[typography.badge, { color: colors.gold }]}>
-              {t('taste.viewProfile')} ›
-            </Text>
+            <Text style={[typography.badge, { color: colors.gold }]}>{t('taste.viewProfile')} ›</Text>
           </Pressable>
         ) : (
           <View style={{ paddingHorizontal: spacing(4), paddingBottom: spacing(1) }}>
@@ -250,12 +232,7 @@ export default function DiscoverScreen() {
               {t('taste.progress', { count: modelSwipeCount, total: 20 })}
             </Text>
             <View style={styles.progressTrack}>
-              <View
-                style={[
-                  styles.progressFill,
-                  { width: `${Math.min(100, (modelSwipeCount / 20) * 100)}%` },
-                ]}
-              />
+              <View style={[styles.progressFill, { width: `${Math.min(100, (modelSwipeCount / 20) * 100)}%` }]} />
             </View>
           </View>
         )
@@ -266,32 +243,18 @@ export default function DiscoverScreen() {
           <CardSkeleton />
         ) : error ? (
           <EmptyState title={t('common.offline')} hint={t('common.error')}>
-            <CTAButton
-              label={t('common.retry')}
-              onPress={() => (isInspiration ? void loadModels() : void loadListings())}
-            />
+            <CTAButton label={t('common.retry')} onPress={() => (isInspiration ? void loadModels() : void loadListings())} />
           </EmptyState>
         ) : deckEmpty ? (
           isInspiration ? (
             <EmptyState title={t('discover.empty')} hint={t('taste.summaryReady')}>
               <CTAButton label={t('taste.findListings')} onPress={() => selectMode('listings')} />
-              <CTAButton
-                label={t('taste.viewProfile')}
-                variant="secondary"
-                onPress={() => router.push('/taste')}
-              />
+              <CTAButton label={t('taste.viewProfile')} variant="secondary" onPress={() => router.push('/taste')} />
             </EmptyState>
           ) : (
             <EmptyState title={t('discover.empty')} hint={t('discover.emptyHint')}>
-              <CTAButton
-                label={t('discover.expandRadius')}
-                onPress={() => router.push('/location')}
-              />
-              <CTAButton
-                label={t('discover.adjustFilters')}
-                variant="secondary"
-                onPress={() => router.push('/filters')}
-              />
+              <CTAButton label={t('discover.expandRadius')} onPress={() => router.push('/location')} />
+              <CTAButton label={t('discover.adjustFilters')} variant="secondary" onPress={() => router.push('/filters')} />
             </EmptyState>
           )
         ) : isInspiration ? (
@@ -322,6 +285,7 @@ export default function DiscoverScreen() {
                 isSponsored={i.isSponsored}
                 dreamCandidate={i.explanation.key === 'explain.similarModels'}
                 explanationText={translateExplanation(i)}
+                monthlyCostTotal={i.monthlyCosts?.total}
                 onOpenedMore={onOpenedMore}
               />
             )}
@@ -332,49 +296,17 @@ export default function DiscoverScreen() {
       {!deckEmpty && !loading ? (
         <View style={styles.actionsArea}>
           <View style={styles.actions}>
-            <RoundButton
-              glyph="↺"
-              color={colors.textMuted}
-              onPress={undo}
-              accessibilityLabel={t('discover.undo')}
-            />
-            <RoundButton
-              glyph="✕"
-              color={colors.dislike}
-              big
-              onPress={() => deckRef.current?.swipe('DISLIKE')}
-              accessibilityLabel={t('actions.dislike')}
-            />
-            <RoundButton
-              glyph="★"
-              color={colors.info}
-              big
-              onPress={() => deckRef.current?.swipe('SUPERLIKE')}
-              accessibilityLabel={t('actions.superlike')}
-            />
-            <RoundButton
-              glyph="♥"
-              color={colors.like}
-              big
-              onPress={() => deckRef.current?.swipe('LIKE')}
-              accessibilityLabel={t('actions.like')}
-            />
+            <RoundButton glyph="↺" color={colors.textMuted} onPress={undo} accessibilityLabel={t('discover.undo')} />
+            <RoundButton glyph="✕" color={colors.dislike} big onPress={() => deckRef.current?.swipe('DISLIKE')} accessibilityLabel={t('actions.dislike')} />
+            <RoundButton glyph="★" color={colors.info} big onPress={() => deckRef.current?.swipe('SUPERLIKE')} accessibilityLabel={t('actions.superlike')} />
+            <RoundButton glyph="♥" color={colors.like} big onPress={() => deckRef.current?.swipe('LIKE')} accessibilityLabel={t('actions.like')} />
             {!isInspiration ? (
-              <RoundButton
-                glyph="ℹ"
-                color={colors.textMuted}
-                onPress={() => items[0] && router.push(`/vehicle/${items[0].listing.id}`)}
-              />
+              <RoundButton glyph="ℹ" color={colors.textMuted} onPress={() => items[0] && router.push(`/vehicle/${items[0].listing.id}`)} />
             ) : (
               <RoundButton glyph="✦" color={colors.gold} onPress={() => router.push('/taste')} />
             )}
           </View>
-          <Text
-            style={[
-              typography.badge,
-              { color: colors.textFaint, textAlign: 'center', letterSpacing: 1 },
-            ]}
-          >
+          <Text style={[typography.badge, { color: colors.textFaint, textAlign: 'center', letterSpacing: 1 }]}>
             ‹ {t('mockup.swipeHint').toUpperCase()} ›
           </Text>
         </View>
@@ -384,11 +316,7 @@ export default function DiscoverScreen() {
 }
 
 function ModeCard({
-  glyph,
-  title,
-  description,
-  accent,
-  onPress,
+  glyph, title, description, accent, onPress,
 }: {
   glyph: string
   title: string
@@ -399,48 +327,28 @@ function ModeCard({
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => [
-        styles.modeCard,
-        accent && { borderColor: colors.gold },
-        pressed && { opacity: 0.8 },
-      ]}
+      style={({ pressed }) => [styles.modeCard, accent && { borderColor: colors.gold }, pressed && { opacity: 0.8 }]}
     >
       <Text style={{ fontSize: 26, color: accent ? colors.gold : colors.textMuted }}>{glyph}</Text>
       <View style={{ flex: 1 }}>
         <Text style={[typography.title, { color: colors.text, fontSize: 18 }]}>{title}</Text>
-        <Text style={[typography.body, { color: colors.textMuted, marginTop: spacing(1) }]}>
-          {description}
-        </Text>
+        <Text style={[typography.body, { color: colors.textMuted, marginTop: spacing(1) }]}>{description}</Text>
       </View>
       <Text style={{ color: colors.textFaint, fontSize: 20 }}>›</Text>
     </Pressable>
   )
 }
 
-function SegmentButton({
-  label,
-  active,
-  onPress,
-}: {
-  label: string
-  active: boolean
-  onPress: () => void
-}) {
+function SegmentButton({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
   return (
     <Pressable onPress={onPress} style={[styles.segmentBtn, active && styles.segmentBtnActive]}>
-      <Text style={[typography.badge, { color: active ? colors.text : colors.textFaint }]}>
-        {label}
-      </Text>
+      <Text style={[typography.badge, { color: active ? colors.text : colors.textFaint }]}>{label}</Text>
     </Pressable>
   )
 }
 
 function RoundButton({
-  glyph,
-  color,
-  onPress,
-  big,
-  accessibilityLabel,
+  glyph, color, onPress, big, accessibilityLabel,
 }: {
   glyph: string
   color: string
@@ -481,11 +389,7 @@ const styles = StyleSheet.create({
     borderColor: colors.cardBorder,
     padding: 3,
   },
-  segmentBtn: {
-    paddingHorizontal: spacing(3.5),
-    paddingVertical: spacing(1.5),
-    borderRadius: radius.pill,
-  },
+  segmentBtn: { paddingHorizontal: spacing(3.5), paddingVertical: spacing(1.5), borderRadius: radius.pill },
   segmentBtnActive: { backgroundColor: colors.card },
   summaryBanner: {
     flexDirection: 'row',
@@ -499,12 +403,7 @@ const styles = StyleSheet.create({
     borderColor: colors.gold,
     backgroundColor: 'rgba(201,161,90,0.1)',
   },
-  progressTrack: {
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: 'rgba(255,255,255,0.07)',
-    marginTop: spacing(1.5),
-  },
+  progressTrack: { height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.07)', marginTop: spacing(1.5) },
   progressFill: { height: 4, borderRadius: 2, backgroundColor: colors.gold },
   deckArea: { flex: 1, margin: spacing(4), marginTop: spacing(2) },
   actionsArea: { paddingBottom: spacing(3), gap: spacing(2) },

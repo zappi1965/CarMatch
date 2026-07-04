@@ -72,6 +72,9 @@ export function VehicleModelCard({
             {model.source === 'DEMO' ? <Badge label={t('discover.demoBadge')} tone="warn" /> : null}
             {model.segment ? <Badge label={model.segment} tone="gold" /> : null}
           </View>
+          {model.imageAttribution ? (
+            <Text style={styles.attribution}>{model.imageAttribution}</Text>
+          ) : null}
         </View>
 
         <View style={{ padding: spacing(4), paddingTop: spacing(3) }}>
@@ -150,6 +153,16 @@ export function VehicleModelCard({
               ))}
             </>
           ) : null}
+          {(model.knownIssuesJson ?? []).length ? (
+            <>
+              <Text style={[typography.label, { color: colors.warn, marginTop: spacing(3), marginBottom: spacing(1.5) }]}>
+                {t('model.knownIssues')}
+              </Text>
+              {(model.knownIssuesJson ?? []).map((s2) => (
+                <Text key={s2} style={[typography.body, { color: colors.textMuted, marginBottom: 3 }]}>! {s2}</Text>
+              ))}
+            </>
+          ) : null}
           {(model.weaknessesJson ?? []).length ? (
             <>
               <Text style={[typography.label, { color: colors.warn, marginTop: spacing(3), marginBottom: spacing(1.5) }]}>
@@ -216,6 +229,7 @@ const styles = StyleSheet.create({
   imageWrap: { flex: 1, backgroundColor: colors.surface, margin: spacing(2.5), marginBottom: 0, borderRadius: radius.md, overflow: 'hidden' },
   image: { width: '100%', height: '100%' },
   imageBadges: { position: 'absolute', top: spacing(3), left: spacing(3), flexDirection: 'row', gap: spacing(2) },
+  attribution: { position: 'absolute', bottom: 4, right: 8, color: 'rgba(244,242,238,0.55)', fontSize: 9 },
   badgeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing(1.5), marginTop: spacing(3) },
   chip: {
     paddingHorizontal: spacing(3),

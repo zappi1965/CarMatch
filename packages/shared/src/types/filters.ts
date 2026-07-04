@@ -32,6 +32,8 @@ export interface VehicleFilters {
   fullServiceHistoryOnly?: boolean
   financingAvailable?: boolean
   electricRangeMinKm?: number
+  /** App-Filter: max. geschätzte Gesamtkosten €/Monat (Discover) */
+  monthlyBudgetMax?: number
   sort?: SearchSort
 }
 

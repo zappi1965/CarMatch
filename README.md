@@ -68,7 +68,7 @@ npm run admin:dev                     # :5180, Login mit ADMIN_TOKEN aus apps/ap
 Tests & Typecheck:
 
 ```bash
-npm run api:test    # 56 Vitest-Tests (Scoring, Taste, Matching, Normalisierung, Geo, Preise)
+npm run api:test    # 79 Vitest-Tests (Scoring, Taste, Matching, Normalisierung, Geo, Preise)
 npm run typecheck
 ```
 
@@ -123,5 +123,59 @@ git subtree split -P carmatch -b carmatch-standalone
 # neues Repo anlegen, dann:
 git push git@github.com:<owner>/carmatch.git carmatch-standalone:main
 ```
+
+## Erweiterungspaket (v0.2)
+
+| Feature | Kern | Wo |
+|---|---|---|
+| **Monatskosten** | Vollkosten €/Monat (Wertverlust, Sprit, Versicherung, Steuer, Wartung) mit dokumentierten Heuristiken + Monatsbudget-Filter | Karte, Detail, Filter |
+| **Duell-Modus** | Paarvergleich zweier Modelle — Sieger +6 / Verlierer −2 ins Taste-Profil | „⚔ Duell" im Inspirationsmodus |
+| **Markttrend & Sparziele** | Preistrend aus eigener PriceHistory, Saison-Hinweise, Sparziel mit Erreichbarkeits-Prognose | Detail, Garage |
+| **Gemeinsame Suche** | Gruppe per Einladungscode, Favoriten-Schnittmenge = Match | Garage |
+| **Besitzer-Wissen** | Bekannte Schwachstellen je Baureihe (nicht verifiziert) + Besitzer-Reviews | Modell-Karte/-Seite |
+| **C2B-Verkauf** | „Was ist mein Auto wert?" aus Vergleichsinseraten + Ankauf-Lead (SellRequest) | Profil → Verkaufen, Admin |
+| **Mein Auto** | Besitzphase: aktueller Marktwert, Wertentwicklung, TÜV-Hinweis | Garage |
+| **EV-Alltagscheck** | Pendelstrecke + Heimladen → passt das E-Auto? (konservativ: 80 % WLTP × 80 % Ladung) | Detail bei E-Autos |
+
+**Demo-Fotos:** Fahrzeugmodelle und passende Demo-Inserate nutzen frei verfügbare
+Fotos von **Wikimedia Commons** (via Wikipedia-Seitenbild, Hotlinking erlaubt) mit
+Attribution auf der Karte und `infoUrl` als Quell-/Lizenznachweis. Für Produktion:
+Autor + Lizenz je Datei über die Commons-API auflösen (TODO in `modelImages.ts`).
+Technische Richtwerte der Modelle sind öffentlich bekannte Daten, `source: DEMO`.
+
+## App-Builds (APK / AAB / IPA)
+
+Builds laufen über [EAS Build](https://docs.expo.dev/build/introduction/) —
+Konfiguration liegt in `apps/mobile/eas.json`, Icons/Splash in `apps/mobile/assets/`.
+
+Einmalig:
+
+```bash
+npm i -g eas-cli
+cd apps/mobile
+eas login                # Expo-Konto
+eas init                 # verknüpft das Projekt (schreibt extra.eas.projectId)
+```
+
+Dann:
+
+```bash
+npm run build:android:apk   # APK  (Profil "preview" — direkt installierbar)
+npm run build:android:aab   # AAB  (Profil "production" — Play Store)
+npm run build:ios           # IPA  (production — braucht Apple Developer Account)
+npm run submit:android      # Upload in den Play-Store-Track "internal"
+npm run submit:ios          # Upload zu App Store Connect
+```
+
+Wichtig:
+- **API-URL**: in `eas.json` pro Profil via `EXPO_PUBLIC_API_URL` gesetzt —
+  vor dem ersten echten Build auf eure Backend-URL ändern
+  (`https://api.carmatch.example` ist Platzhalter).
+- **iOS**: Apple-Team/Zertifikate verwaltet EAS automatisch nach `eas credentials`
+  bzw. beim ersten Build-Prompt. `ITSAppUsesNonExemptEncryption=false` ist gesetzt.
+- **Android**: Keystore erzeugt/verwaltet EAS automatisch. `versionCode`
+  zählt bei `production` automatisch hoch (`autoIncrement`).
+- Lokale Builds ohne EAS-Cloud: `npx expo run:android --variant release`
+  (benötigt Android SDK) bzw. `npx expo run:ios --configuration Release` (macOS/Xcode).
 
 Roadmap: siehe [ROADMAP.md](./ROADMAP.md).

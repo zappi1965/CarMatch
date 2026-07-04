@@ -41,18 +41,11 @@ export default function SettingsScreen() {
   }
 
   return (
-    <ScrollView
-      style={{ backgroundColor: colors.bg }}
-      contentContainerStyle={{ padding: spacing(4), gap: spacing(3) }}
-    >
+    <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={{ padding: spacing(4), gap: spacing(3) }}>
       {isGuest ? (
         <Pressable style={styles.guestBanner} onPress={() => router.push('/auth')}>
-          <Text style={[typography.body, { color: colors.text, fontWeight: '600' }]}>
-            {t('auth.guestActive')}
-          </Text>
-          <Text style={[typography.badge, { color: colors.textMuted, marginTop: 2 }]}>
-            {t('auth.upgradeHint')}
-          </Text>
+          <Text style={[typography.body, { color: colors.text, fontWeight: '600' }]}>{t('auth.guestActive')}</Text>
+          <Text style={[typography.badge, { color: colors.textMuted, marginTop: 2 }]}>{t('auth.upgradeHint')}</Text>
         </Pressable>
       ) : null}
 
@@ -60,18 +53,13 @@ export default function SettingsScreen() {
         <Item label={t('settings.location')} onPress={() => router.push('/location')} />
         <Item label={t('settings.language')} onPress={() => router.push('/settings/language')} />
         <Item label={t('settings.scores')} onPress={() => router.push('/settings/scores')} />
-        <Item
-          label={t('settings.notifications')}
-          onPress={() => router.push('/settings/notifications')}
-        />
+        <Item label={t('settings.notifications')} onPress={() => router.push('/settings/notifications')} />
       </Section>
 
       <Section>
         <View style={styles.item}>
           <View style={{ flex: 1, paddingRight: spacing(3) }}>
-            <Text style={[typography.body, { color: colors.text }]}>
-              {t('settings.personalization')}
-            </Text>
+            <Text style={[typography.body, { color: colors.text }]}>{t('settings.personalization')}</Text>
             <Text style={[typography.badge, { color: colors.textFaint, marginTop: 2 }]}>
               {t('settings.personalizationHint')}
             </Text>
@@ -86,11 +74,8 @@ export default function SettingsScreen() {
       </Section>
 
       <Section>
-        <Item
-          label={t('settings.premium')}
-          onPress={() => router.push('/premium')}
-          badge={t('actions.comingSoon')}
-        />
+        <Item label={t('sell.title')} onPress={() => router.push('/sell')} />
+        <Item label={t('settings.premium')} onPress={() => router.push('/premium')} badge={t('actions.comingSoon')} />
       </Section>
 
       <Section>
@@ -106,10 +91,7 @@ function Section({ children }: { children: React.ReactNode }) {
 }
 
 function Item({
-  label,
-  onPress,
-  badge,
-  destructive,
+  label, onPress, badge, destructive,
 }: {
   label: string
   onPress: () => void
@@ -117,13 +99,8 @@ function Item({
   destructive?: boolean
 }) {
   return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => [styles.item, pressed && { opacity: 0.7 }]}
-    >
-      <Text style={[typography.body, { color: destructive ? colors.dislike : colors.text }]}>
-        {label}
-      </Text>
+    <Pressable onPress={onPress} style={({ pressed }) => [styles.item, pressed && { opacity: 0.7 }]}>
+      <Text style={[typography.body, { color: destructive ? colors.dislike : colors.text }]}>{label}</Text>
       <Text style={[typography.badge, { color: colors.textFaint }]}>{badge ?? '›'}</Text>
     </Pressable>
   )
