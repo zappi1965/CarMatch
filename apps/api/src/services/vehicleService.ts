@@ -4,6 +4,8 @@ import type { Prisma } from '@prisma/client'
 import { prisma } from '../db.js'
 import { assessPrice, computeRiskFlags } from '../scores/priceAssessment.js'
 import { computeVehicleScores } from '../scores/vehicleScores.js'
+import { estimateMonthlyCosts } from '../scores/monthlyCosts.js'
+import { getModelTrend } from './marketService.js'
 import { getAdapter } from '../providers/registry.js'
 
 /** Prisma-Where aus dem gemeinsamen Filterobjekt. */
@@ -125,6 +127,18 @@ export async function getListingWithInsights(id: string, userPoint?: GeoPoint) {
       ? Math.round(distanceKm(userPoint, { latitude: listing.latitude, longitude: listing.longitude }) * 10) / 10
       : null
 
+  const monthlyCosts = estimateMonthlyCosts({
+    price: listing.price,
+    year: listing.year,
+    mileage: listing.mileage,
+    powerHp: listing.powerHp,
+    fuelType: listing.fuelType,
+    consumptionL100: listing.consumptionL100 ?? listing.specs?.consumptionL100,
+    displacementCcm: listing.displacementCcm,
+    co2GKm: listing.co2GKm,
+  })
+  const marketTrend = await getModelTrend(listing.make, listing.model)
+
   return {
     ...listing,
     rawData: undefined, // Rohdaten nicht an Clients ausliefern
@@ -132,6 +146,8 @@ export async function getListingWithInsights(id: string, userPoint?: GeoPoint) {
     priceAssessment,
     riskFlags,
     scores,
+    monthlyCosts,
+    marketTrend,
     attribution,
     isSponsored: listing.sponsored.length > 0,
   }

@@ -2,6 +2,7 @@ import type { NormalizedListing, SourceAttribution, VehicleFilters, LocationQuer
 import { distanceKm } from '@carmatch/shared'
 import type { DealerContact, VehicleProviderAdapter } from '../types.js'
 import { demoListings } from './demoListings.js'
+import { findModelImage } from '../../models/modelImages.js'
 
 /**
  * DemoProviderAdapter — NUR für Entwicklung/Tests.
@@ -17,12 +18,17 @@ export class DemoProviderAdapter implements VehicleProviderAdapter {
 
   normalizeListing(raw: unknown): NormalizedListing {
     const r = raw as (typeof demoListings)[number]
+    // Wenn ein frei verfügbares Wikimedia-Foto zum Modell existiert, dieses
+    // statt des Platzhalters nutzen (Inserat bleibt fiktiv → provider "demo").
+    const wiki = findModelImage(r.make, r.model, r.variant)
     return {
       ...r,
       provider: this.key,
       currency: 'EUR',
       isAvailable: true,
-      imagesAreDemo: true,
+      images: wiki ? [wiki.imageUrl, ...r.images.slice(1)] : r.images,
+      imagesAreDemo: !wiki,
+      imageAttribution: wiki?.attribution,
       rawData: undefined, // Demo-Daten sind bereits normalisiert
     }
   }

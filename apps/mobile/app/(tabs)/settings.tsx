@@ -74,6 +74,7 @@ export default function SettingsScreen() {
       </Section>
 
       <Section>
+        <Item label={t('sell.title')} onPress={() => router.push('/sell')} />
         <Item label={t('settings.premium')} onPress={() => router.push('/premium')} badge={t('actions.comingSoon')} />
       </Section>
 

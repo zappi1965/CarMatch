@@ -6,7 +6,8 @@
 import bcrypt from 'bcryptjs'
 import { prisma } from '../src/db.js'
 import { syncAllProviders } from '../src/jobs/syncListings.js'
-import { vehicleModelSeeds } from '../src/models/vehicleModelSeed.js'
+import { modelKnownIssues, vehicleModelSeeds } from '../src/models/vehicleModelSeed.js'
+import { findModelImage } from '../src/models/modelImages.js'
 import { rebuildModelListingMatches } from '../src/services/modelMatchService.js'
 
 const result = await syncAllProviders()
@@ -18,6 +19,9 @@ for (const seed of vehicleModelSeeds) {
   const existing = await prisma.vehicleModel.findFirst({
     where: { make: seed.make, model: seed.model, variant: seed.variant ?? null },
   })
+  // Frei verfügbares Wikimedia-Foto (mit Attribution), sonst Platzhalter
+  const wiki = findModelImage(seed.make, seed.model, seed.variant)
+  const key = `${seed.make} ${seed.model}${seed.variant ? ` ${seed.variant}` : ''}`
   const model = existing ?? await prisma.vehicleModel.create({
     data: {
       ...rest,
@@ -25,8 +29,11 @@ for (const seed of vehicleModelSeeds) {
       drivetrain: (seed.drivetrain ?? null) as never,
       fuelTypes: seed.fuelTypes,
       transmissionTypes: seed.transmissionTypes,
-      imageUrls,
-      imagesAreDemo: true,
+      imageUrls: wiki ? [wiki.imageUrl] : imageUrls,
+      imagesAreDemo: !wiki,
+      imageAttribution: wiki?.attribution,
+      infoUrl: wiki?.infoUrl,
+      knownIssuesJson: modelKnownIssues[key] ?? modelKnownIssues[`${seed.make} ${seed.model}`],
       strengthsJson: strengths,
       weaknessesJson: weaknesses,
       tagsJson: tags,

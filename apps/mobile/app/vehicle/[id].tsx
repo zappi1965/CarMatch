@@ -3,6 +3,7 @@ import { Alert, Image, Linking, ScrollView, StyleSheet, Text, TextInput, View } 
 import { useLocalSearchParams } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { api, buildQuery } from '../../src/lib/api'
+import { Switch } from 'react-native'
 import { useSession } from '../../src/lib/store'
 import { colors, radius, spacing, typography } from '../../src/lib/theme'
 import { formatKm, formatPrice, type ListingInsights } from '../../src/lib/types'
@@ -19,6 +20,10 @@ export default function VehicleDetailScreen() {
   const [data, setData] = useState<ListingInsights | null>(null)
   const [leadMessage, setLeadMessage] = useState('')
   const [leadSent, setLeadSent] = useState(false)
+  const [goalSaved, setGoalSaved] = useState(false)
+  const [evKm, setEvKm] = useState('40')
+  const [evHome, setEvHome] = useState(true)
+  const [evResult, setEvResult] = useState<{ verdict: string; usableRangeKm?: number; chargesPerWeek?: number } | null>(null)
 
   useEffect(() => {
     if (!id) return
@@ -110,6 +115,114 @@ export default function VehicleDetailScreen() {
           <Row label={t('card.seller')} value={data.sellerType === 'DEALER' ? t('card.dealer') : t('card.private')} />
           {data.distanceKm != null ? <Row label={t('location.title')} value={`${data.city ?? ''} · ${t('card.distance', { km: data.distanceKm })}`} /> : null}
         </View>
+
+        {/* Monatskosten-Schätzung */}
+        {data.monthlyCosts ? (
+          <View style={styles.box}>
+            <Text style={[typography.label, { color: colors.textMuted, marginBottom: spacing(2) }]}>
+              {t('costs.title')}{data.monthlyCosts.confidence < 0.5 ? ` (${t('card.estimated')})` : ''}
+            </Text>
+            <Row label={t('costs.depreciation')} value={`${data.monthlyCosts.depreciation} €`} />
+            <Row label={t('costs.fuel')} value={`${data.monthlyCosts.fuel} €`} />
+            <Row label={t('costs.insurance')} value={`${data.monthlyCosts.insurance} €`} />
+            <Row label={t('costs.tax')} value={`${data.monthlyCosts.tax} €`} />
+            <Row label={t('costs.maintenance')} value={`${data.monthlyCosts.maintenance} €`} />
+            <Row label={t('costs.total')} value={`≈ ${data.monthlyCosts.total} €/Monat`} />
+            <Text style={[typography.badge, { color: colors.textFaint, marginTop: spacing(2) }]}>
+              {t('costs.assumption', { km: data.monthlyCosts.assumptions.kmPerYear.toLocaleString('de-DE') })}
+            </Text>
+          </View>
+        ) : null}
+
+        {/* Markttrend / Kauf-Timing */}
+        {data.marketTrend && data.marketTrend.direction !== 'UNKNOWN' ? (
+          <View style={styles.box}>
+            <Text style={[typography.label, { color: colors.textMuted, marginBottom: spacing(1) }]}>
+              {t('trend.title')}
+            </Text>
+            <Text style={[typography.body, {
+              color: data.marketTrend.direction === 'FALLING' ? colors.like : data.marketTrend.direction === 'RISING' ? colors.warn : colors.textMuted,
+              fontWeight: '600',
+            }]}>
+              {data.marketTrend.direction === 'FALLING' ? '↓ ' : data.marketTrend.direction === 'RISING' ? '↑ ' : '→ '}
+              {t(`trend.${data.marketTrend.direction}`, { percent: Math.abs(data.marketTrend.trendPercent ?? 0) })}
+            </Text>
+            {data.marketTrend.seasonalHint ? (
+              <Text style={[typography.badge, { color: colors.gold, marginTop: spacing(1) }]}>
+                {t(`trend.${data.marketTrend.seasonalHint}`)}
+              </Text>
+            ) : null}
+          </View>
+        ) : null}
+
+        {/* E-Auto-Alltagscheck */}
+        {(data.fuelType === 'ELECTRIC' || data.fuelType === 'PLUGIN_HYBRID') && data.specs?.electricRangeKm != null ? (
+          <View style={styles.box}>
+            <Text style={[typography.label, { color: colors.textMuted, marginBottom: spacing(2) }]}>
+              ⚡ {t('ev.title')}
+            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing(3) }}>
+              <TextInput
+                style={[styles.input, { flex: 1, minHeight: 0 }]}
+                keyboardType="numeric"
+                value={evKm}
+                onChangeText={(v) => setEvKm(v.replace(/\D/g, ''))}
+                placeholder={t('ev.dailyKm')}
+                placeholderTextColor={colors.textFaint}
+              />
+              <Text style={[typography.badge, { color: colors.textMuted }]}>{t('ev.homeCharging')}</Text>
+              <Switch value={evHome} onValueChange={setEvHome} trackColor={{ true: colors.like, false: colors.cardBorder }} />
+            </View>
+            <CTAButton
+              label={t('ev.check')}
+              variant="secondary"
+              style={{ marginTop: spacing(2) }}
+              onPress={() =>
+                void api
+                  .get<{ verdict: string; usableRangeKm?: number; chargesPerWeek?: number }>(
+                    `/vehicles/${data.id}/ev-check?dailyKm=${evKm || '40'}&homeCharging=${evHome}`,
+                  )
+                  .then(setEvResult)
+                  .catch(() => {})
+              }
+            />
+            {evResult ? (
+              <View style={{ marginTop: spacing(2) }}>
+                <Text style={[typography.body, {
+                  fontWeight: '600',
+                  color: evResult.verdict === 'FITS' ? colors.like : evResult.verdict === 'TIGHT' ? colors.warn : colors.dislike,
+                }]}>
+                  {t(`ev.${evResult.verdict}`, evResult.verdict)}
+                </Text>
+                {evResult.usableRangeKm != null ? (
+                  <Text style={[typography.badge, { color: colors.textFaint, marginTop: 2 }]}>
+                    {t('ev.detail', { range: evResult.usableRangeKm, charges: evResult.chargesPerWeek })}
+                  </Text>
+                ) : null}
+              </View>
+            ) : null}
+          </View>
+        ) : null}
+
+        {/* Sparziel */}
+        {!goalSaved ? (
+          <CTAButton
+            label={`🎯 ${t('goals.add')}`}
+            variant="secondary"
+            onPress={() =>
+              void api
+                .post('/garage/savings-goals', {
+                  listingId: data.id,
+                  title: `${data.make} ${data.model}`,
+                  targetPrice: data.price,
+                })
+                .then(() => {
+                  setGoalSaved(true)
+                  Alert.alert(t('goals.added'))
+                })
+            }
+          />
+        ) : null}
 
         {/* Lead / Kontakt */}
         {!leadSent ? (

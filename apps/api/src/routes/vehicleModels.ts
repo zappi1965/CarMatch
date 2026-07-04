@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { prisma } from '../db.js'
 import { track } from '../services/analyticsService.js'
 
+
 const publicModel = (m: Record<string, unknown>) => ({ ...m })
 
 export async function vehicleModelRoutes(app: FastifyInstance) {
@@ -93,5 +94,35 @@ export async function vehicleModelRoutes(app: FastifyInstance) {
         listing: { ...m.listing, rawData: undefined },
       })),
     }
+  })
+
+  // ── Besitzer-Wissen: Reviews auf Modell-Ebene ──
+  app.get('/:id/reviews', async (req) => {
+    const { id } = z.object({ id: z.string() }).parse(req.params)
+    const reviews = await prisma.modelReview.findMany({
+      where: { vehicleModelId: id },
+      orderBy: { createdAt: 'desc' },
+      take: 50,
+    })
+    const avg = reviews.length
+      ? Math.round((reviews.reduce((s, r) => s + r.rating, 0) / reviews.length) * 10) / 10
+      : null
+    return { ok: true, data: { reviews, averageRating: avg, count: reviews.length } }
+  })
+
+  app.post('/:id/reviews', { preHandler: [app.authenticate] }, async (req, reply) => {
+    const { id } = z.object({ id: z.string() }).parse(req.params)
+    const body = z
+      .object({ rating: z.number().int().min(1).max(5), text: z.string().max(1000).optional(), isOwner: z.boolean().default(false) })
+      .parse(req.body)
+    const model = await prisma.vehicleModel.findUnique({ where: { id } })
+    if (!model) return reply.code(404).send({ ok: false, error: 'NOT_FOUND' })
+    const review = await prisma.modelReview.upsert({
+      where: { userId_vehicleModelId: { userId: req.user.sub, vehicleModelId: id } },
+      create: { userId: req.user.sub, vehicleModelId: id, ...body },
+      update: body,
+    })
+    await track('model_review_created', req.user.sub)
+    return { ok: true, data: review }
   })
 }

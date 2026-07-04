@@ -40,6 +40,16 @@ export default function FiltersScreen() {
           </View>
         </Group>
 
+        <Group label={t('costs.budgetFilter')}>
+          <TextInput
+            style={styles.input}
+            keyboardType="numeric"
+            placeholder="z. B. 450"
+            placeholderTextColor={colors.textFaint}
+            {...numField('monthlyBudgetMax')}
+          />
+        </Group>
+
         <Group label={t('filters.year')}>
           <View style={styles.pair}>
             <TextInput style={styles.input} keyboardType="numeric" placeholder={t('filters.min')} placeholderTextColor={colors.textFaint} {...numField('yearMin')} />

@@ -206,9 +206,14 @@ export default function DiscoverScreen() {
             </Pressable>
           </View>
         ) : (
-          <Pressable onPress={() => router.push('/taste')} hitSlop={8}>
-            <Text style={[typography.badge, { color: colors.gold }]}>{t('taste.title')} ›</Text>
-          </Pressable>
+          <View style={{ flexDirection: 'row', gap: spacing(3) }}>
+            <Pressable onPress={() => router.push('/duel')} hitSlop={8}>
+              <Text style={[typography.badge, { color: colors.info }]}>⚔ {t('duel.entry')}</Text>
+            </Pressable>
+            <Pressable onPress={() => router.push('/taste')} hitSlop={8}>
+              <Text style={[typography.badge, { color: colors.gold }]}>{t('taste.title')} ›</Text>
+            </Pressable>
+          </View>
         )}
       </View>
 
@@ -280,6 +285,7 @@ export default function DiscoverScreen() {
                 isSponsored={i.isSponsored}
                 dreamCandidate={i.explanation.key === 'explain.similarModels'}
                 explanationText={translateExplanation(i)}
+                monthlyCostTotal={i.monthlyCosts?.total}
                 onOpenedMore={onOpenedMore}
               />
             )}

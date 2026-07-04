@@ -157,6 +157,7 @@ model VehicleListing {
   financingAvailable Boolean?
   images            Json // string[]
   imagesAreDemo     Boolean      @default(false)
+  imageAttribution  String? // z. B. "Foto: Wikimedia Commons" (Quelle: infoUrl der Modell-Ebene)
   sellerType        SellerType   @default(DEALER)
   dealerId          String?
   latitude          Float?
@@ -486,6 +487,9 @@ model VehicleModel {
   typicalUsedPriceMax Int?
   imageUrls           Json // string[]
   imagesAreDemo       Boolean  @default(false)
+  imageAttribution    String?
+  infoUrl             String? // Quell-/Lizenznachweis (z. B. Wikipedia-Artikel)
+  knownIssuesJson     Json? // typische Schwachstellen (community-bekannt, nicht verifiziert)
   description         String?
   strengthsJson       Json? // string[] (i18n-Keys oder Texte)
   weaknessesJson      Json?
@@ -592,4 +596,108 @@ model VehicleModelToListingMatch {
   listing      VehicleListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
   @@unique([vehicleModelId, listingId])
+}
+
+// ─── Erweiterungen: Duell, Gemeinsame Suche, Sparziele, Besitz, C2B ────────
+
+/// Duell-Modus: Paarvergleich zweier Fahrzeugmodelle (informationsreicher als Einzel-Swipes).
+model DuelEvent {
+  id            String   @id @default(cuid())
+  userId        String
+  winnerModelId String
+  loserModelId  String
+  createdAt     DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+/// Gemeinsame Suche: Paar/Familie swiped zusammen, Favoriten-Schnittmenge = Match.
+model SearchCircle {
+  id         String   @id @default(cuid())
+  name       String
+  inviteCode String   @unique
+  createdAt  DateTime @default(now())
+
+  members CircleMember[]
+}
+
+model CircleMember {
+  id       String @id @default(cuid())
+  circleId String
+  userId   String
+  joinedAt DateTime @default(now())
+
+  circle SearchCircle @relation(fields: [circleId], references: [id], onDelete: Cascade)
+
+  @@unique([circleId, userId])
+  @@index([userId])
+}
+
+/// Sparziel: "Traumwagen beobachten, bis er ins Budget passt".
+model SavingsGoal {
+  id            String   @id @default(cuid())
+  userId        String
+  listingId     String?
+  vehicleModelId String?
+  title         String
+  targetPrice   Int
+  currentBudget Int      @default(0)
+  monthlySaving Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  @@index([userId])
+}
+
+/// Garage nach dem Kauf: eigenes Fahrzeug mit Wertverlauf + TÜV-Erinnerung.
+model OwnedVehicle {
+  id              String   @id @default(cuid())
+  userId          String
+  make            String
+  model           String
+  variant         String?
+  year            Int?
+  mileage         Int?
+  powerHp         Int?
+  fuelType        FuelType?
+  purchasePrice   Int?
+  purchasedAt     DateTime?
+  inspectionUntil String? // "YYYY-MM" — Push-Kategorie ownedCar
+  createdAt       DateTime @default(now())
+
+  @@index([userId])
+}
+
+/// C2B-Verkaufsanfrage: "Was ist mein Auto wert?" → Ankauf-Lead (monetarisierbar).
+model SellRequest {
+  id                 String   @id @default(cuid())
+  userId             String
+  make               String
+  model              String
+  variant            String?
+  year               Int?
+  mileage            Int?
+  powerHp            Int?
+  fuelType           FuelType?
+  estimatedValue     Int?
+  estimateConfidence Float?
+  contactEmail       String?
+  status             String   @default("NEW") // NEW | FORWARDED | CLOSED
+  monetizationStatus String   @default("UNBILLED")
+  createdAt          DateTime @default(now())
+
+  @@index([status, createdAt])
+}
+
+/// Besitzer-Review auf Modell-Ebene (Inspirationsmodus als Wissensbasis).
+model ModelReview {
+  id             String   @id @default(cuid())
+  userId         String
+  vehicleModelId String
+  rating         Int // 1–5
+  text           String?
+  isOwner        Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  @@unique([userId, vehicleModelId])
+  @@index([vehicleModelId, createdAt])
 }

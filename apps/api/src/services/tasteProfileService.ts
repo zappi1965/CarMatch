@@ -10,7 +10,7 @@ import {
 
 /** Lädt alle Taste-Signale (Modell-Swipes + Inserats-Verhalten) eines Nutzers. */
 async function loadSignals(userId: string): Promise<TasteSignal[]> {
-  const [modelSwipes, listingSwipes, favorites] = await Promise.all([
+  const [modelSwipes, listingSwipes, favorites, duels] = await Promise.all([
     prisma.modelSwipeEvent.findMany({
       where: { userId, undone: false },
       include: { vehicleModel: true },
@@ -24,6 +24,7 @@ async function loadSignals(userId: string): Promise<TasteSignal[]> {
       take: 500,
     }),
     prisma.favorite.findMany({ where: { userId }, select: { listingId: true } }),
+    prisma.duelEvent.findMany({ where: { userId }, orderBy: { createdAt: 'asc' }, take: 300 }),
   ])
   const favoriteIds = new Set(favorites.map((f) => f.listingId))
 
@@ -75,6 +76,38 @@ async function loadSignals(userId: string): Promise<TasteSignal[]> {
         priceMid: l.price,
       },
     })
+  }
+  // Duelle: Gewinner/Verlierer als Paarvergleichs-Signale (+6 / -2)
+  if (duels.length > 0) {
+    const modelIds = [...new Set(duels.flatMap((d) => [d.winnerModelId, d.loserModelId]))]
+    const models = await prisma.vehicleModel.findMany({ where: { id: { in: modelIds } } })
+    const byId = new Map(models.map((m) => [m.id, m]))
+    const toAttrs = (id: string) => {
+      const m = byId.get(id)
+      if (!m) return null
+      return {
+        make: m.make,
+        model: [m.model, m.variant].filter(Boolean).join(' '),
+        segment: m.segment,
+        bodyType: m.bodyType,
+        vehicleSize: m.vehicleSize,
+        fuelTypes: (m.fuelTypes as string[] | null) ?? undefined,
+        transmissionTypes: (m.transmissionTypes as string[] | null) ?? undefined,
+        drivetrain: m.drivetrain,
+        powerHpMid: m.minPowerHp != null && m.maxPowerHp != null ? (m.minPowerHp + m.maxPowerHp) / 2 : m.maxPowerHp,
+        priceMid:
+          m.typicalUsedPriceMin != null && m.typicalUsedPriceMax != null
+            ? (m.typicalUsedPriceMin + m.typicalUsedPriceMax) / 2
+            : null,
+        tags: (m.tagsJson as string[] | null) ?? undefined,
+      }
+    }
+    for (const d of duels) {
+      const winner = toAttrs(d.winnerModelId)
+      const loser = toAttrs(d.loserModelId)
+      if (winner) signals.push({ kind: 'DUEL_WIN', action: 'LIKE', attributes: winner })
+      if (loser) signals.push({ kind: 'DUEL_LOSS', action: 'DISLIKE', attributes: loser })
+    }
   }
   return signals
 }

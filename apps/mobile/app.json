@@ -2,25 +2,40 @@
   "expo": {
     "name": "CarMatch",
     "slug": "carmatch",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "scheme": "carmatch",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#0E0F12",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0E0F12"
+    },
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "de.carmatch.app",
+      "buildNumber": "1",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "CarMatch nutzt deinen Standort nur, um Fahrzeuge in deiner Umgebung zu finden."
+        "NSLocationWhenInUseUsageDescription": "CarMatch nutzt deinen Standort nur, um Fahrzeuge in deiner Umgebung zu finden.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
       "package": "de.carmatch.app",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#17181C"
+      },
       "permissions": ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"]
     },
     "web": {
       "bundler": "metro",
-      "output": "single"
+      "output": "single",
+      "favicon": "./assets/favicon.png"
     },
     "plugins": ["expo-router", "expo-localization", "expo-location", "expo-notifications"],
     "extra": {

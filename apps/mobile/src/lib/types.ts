@@ -41,6 +41,7 @@ export interface ListingDto {
   financingAvailable?: boolean | null
   images: string[]
   imagesAreDemo: boolean
+  imageAttribution?: string | null
   sellerType: string
   city?: string | null
   postalCode?: string | null
@@ -64,11 +65,31 @@ export interface SpecsDto {
   verified: boolean
 }
 
+export interface MonthlyCostsDto {
+  depreciation: number
+  fuel: number
+  insurance: number
+  tax: number
+  maintenance: number
+  total: number
+  confidence: number
+  assumptions: { kmPerYear: number }
+}
+
+export interface MarketTrendDto {
+  trendPercent: number | null
+  direction: 'FALLING' | 'RISING' | 'STABLE' | 'UNKNOWN'
+  sampleSize: number
+  confidence: number
+  seasonalHint: string | null
+}
+
 export interface DiscoverItem {
   listing: ListingDto
   distanceKm?: number | null
   explanation: RecommendationExplanation
   isSponsored: boolean
+  monthlyCosts?: MonthlyCostsDto
 }
 
 export interface ListingInsights extends ListingDto {
@@ -76,6 +97,8 @@ export interface ListingInsights extends ListingDto {
   priceAssessment: PriceAssessment
   riskFlags: RiskFlag[]
   scores: VehicleScore[]
+  monthlyCosts?: MonthlyCostsDto
+  marketTrend?: MarketTrendDto
   attribution?: { displayName: string; attributionText: string } | null
   isSponsored: boolean
 }
@@ -107,6 +130,9 @@ export interface VehicleModelDto {
   strengthsJson?: string[] | null
   weaknessesJson?: string[] | null
   tagsJson?: string[] | null
+  knownIssuesJson?: string[] | null
+  imageAttribution?: string | null
+  infoUrl?: string | null
   source: string
   specs?: {
     zeroToHundred?: number | null

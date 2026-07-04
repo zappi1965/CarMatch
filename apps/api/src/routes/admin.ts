@@ -181,6 +181,12 @@ export async function adminRoutes(app: FastifyInstance) {
     }
   })
 
+  /** C2B: eingegangene Verkaufsanfragen (Ankauf-Leads). */
+  app.get('/sell-requests', async () => {
+    const rows = await prisma.sellRequest.findMany({ orderBy: { createdAt: 'desc' }, take: 100 })
+    return { ok: true, data: rows }
+  })
+
   app.get('/feature-flags', async () => ({
     ok: true,
     data: await prisma.featureFlag.findMany(),

@@ -260,3 +260,21 @@ export const vehicleModelSeeds: (VehicleModelSeed & { imageUrls: string[] })[] =
     specs: { zeroToHundred: 4.8, topSpeed: 250, weightKg: 1739 },
   },
 ]
+
+/**
+ * Typische, community-bekannte Schwachstellen je Baureihe — bewusst vorsichtig
+ * formuliert, in der UI als "nicht verifiziert" gekennzeichnet. Produktion:
+ * TÜV-Report-/DAT-Daten lizenzieren (v0.4).
+ */
+export const modelKnownIssues: Record<string, string[]> = {
+  'Volkswagen Golf GTI': ['Infotainment-Software früher Mk8-Baujahre gilt als fehleranfällig'],
+  'BMW M340i Touring': ['Kühlsystem und Dichtungen im Alter prüfen (B58 sonst als robust bekannt)'],
+  'Porsche 718 Cayman': ['Frontkühler anfällig für Steinschlag — bei Besichtigung prüfen'],
+  'Audi RS6 Avant': ['Hohe Wartungs- und Reifenkosten einplanen; Fahrwerkskomponenten prüfen'],
+  'Mercedes-AMG C63': ['Wartungshistorie kritisch — Vorschäden durch Tuning verbreitet'],
+  'Land Rover Range Rover Sport': ['Luftfahrwerk und Elektronik sind bekannte Kostenpunkte'],
+  'Alfa Romeo Giulia Quadrifoglio': ['Elektronik-Sensibilitäten; dünneres Service-Netz beachten'],
+  'Tesla Model 3 Performance': ['Verarbeitungsqualität streut; hoher Reifenverschleiß'],
+  'Cupra Formentor': ['Infotainment-Software früher Baujahre gilt als fehleranfällig'],
+  'Ford Mustang': ['Hoher Verbrauch; Innenraumqualität unter EU-Niveau'],
+}

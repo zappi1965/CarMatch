@@ -21,6 +21,7 @@ export function VehicleCard({
   isSponsored,
   dreamCandidate,
   explanationText,
+  monthlyCostTotal,
   onOpenedMore,
 }: {
   listing: ListingDto
@@ -28,6 +29,7 @@ export function VehicleCard({
   isSponsored?: boolean
   dreamCandidate?: boolean
   explanationText?: string
+  monthlyCostTotal?: number
   onOpenedMore?: () => void
 }) {
   const { t } = useTranslation()
@@ -76,9 +78,12 @@ export function VehicleCard({
           <Image source={{ uri: listing.images[0] }} style={styles.image} resizeMode="cover" />
           <View style={styles.imageBadges}>
             {dreamCandidate ? <Badge label={`◆ ${t('mockup.dreamCandidate').toUpperCase()}`} tone="gold" /> : null}
-            {listing.imagesAreDemo ? <Badge label={t('discover.demoBadge')} tone="warn" /> : null}
+            {(listing.imagesAreDemo || listing.provider === 'demo') ? <Badge label={t('discover.demoBadge')} tone="warn" /> : null}
             {isSponsored ? <Badge label={t('discover.sponsored')} tone="gold" /> : null}
           </View>
+          {listing.imageAttribution ? (
+            <Text style={styles.attribution}>{listing.imageAttribution}</Text>
+          ) : null}
         </View>
 
         <View style={styles.front}>
@@ -92,9 +97,16 @@ export function VehicleCard({
               </Text>
             </Pressable>
           </View>
-          <Text style={[typography.price, { color: colors.text, marginTop: spacing(1) }]}>
-            {formatPrice(listing.price, listing.currency)}
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing(2.5), marginTop: spacing(1) }}>
+            <Text style={[typography.price, { color: colors.text }]}>
+              {formatPrice(listing.price, listing.currency)}
+            </Text>
+            {monthlyCostTotal != null ? (
+              <Text style={[typography.badge, { color: colors.gold }]}>
+                {t('costs.perMonth', { amount: monthlyCostTotal })}
+              </Text>
+            ) : null}
+          </View>
 
           <View style={styles.factsRow}>
             <Fact glyph="◷" value={listing.year != null ? String(listing.year) : '–'} />
@@ -273,6 +285,10 @@ const styles = StyleSheet.create({
   backImageWrap: { height: 150, backgroundColor: colors.bg, margin: spacing(2.5), borderRadius: radius.md, overflow: 'hidden' },
   image: { width: '100%', height: '100%' },
   imageBadges: { position: 'absolute', top: spacing(3), left: spacing(3), flexDirection: 'row', gap: spacing(2) },
+  attribution: {
+    position: 'absolute', bottom: 4, right: 8,
+    color: 'rgba(244,242,238,0.55)', fontSize: 9,
+  },
   front: { padding: spacing(4), paddingTop: spacing(3) },
   factsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing(3.5), marginTop: spacing(3) },
   badgeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing(1.5), marginTop: spacing(3) },
