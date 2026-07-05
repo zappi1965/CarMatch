@@ -178,4 +178,28 @@ Wichtig:
 - Lokale Builds ohne EAS-Cloud: `npx expo run:android --variant release`
   (benötigt Android SDK) bzw. `npx expo run:ios --configuration Release` (macOS/Xcode).
 
+## Backend-Deployment (Railway)
+
+Repo-Root enthält `Dockerfile` + `railway.json` (Healthcheck `/health`,
+Migrationen laufen beim Start; `SEED_ON_BOOT=true` lädt Demo-Daten — nur Staging).
+
+1. Railway → New Project → Deploy from GitHub → `zappi1965/carmatch`
+2. PostgreSQL-Plugin hinzufügen; ENV setzen: `DATABASE_URL` (Referenz),
+   `JWT_SECRET`, `ADMIN_TOKEN`, `ENABLED_PROVIDERS=demo`, `SEED_ON_BOOT=true`
+3. Deployen → API-URL notieren → in `eas.json` und als GitHub-Secret
+   `EXPO_PUBLIC_API_URL` eintragen.
+
+## CI & Firebase App Distribution
+
+- **`.github/workflows/ci.yml`** — Tests + Typecheck (API, Mobile, Admin) bei jedem PR.
+- **`.github/workflows/android-build.yml`** — baut **APK + AAB ohne EAS** direkt im
+  Runner (expo prebuild + Gradle) und lädt die APK optional zu
+  **Firebase App Distribution** hoch. Manuell startbar (workflow_dispatch) oder per Tag `v*`.
+  Benötigte Secrets sind im Workflow-Kopf dokumentiert
+  (`EXPO_PUBLIC_API_URL`, `FIREBASE_APP_ID_ANDROID`, `FIREBASE_SERVICE_ACCOUNT`,
+  optional eigener Keystore).
+- **iOS/IPA**: erfordert Apple-Developer-Account (Signierpflicht) — via
+  `npm run build:ios` (EAS) oder macOS-Runner mit euren Zertifikaten. Firebase
+  App Distribution für iOS braucht eine ad-hoc-signierte IPA mit registrierten Geräte-UDIDs.
+
 Roadmap: siehe [ROADMAP.md](./ROADMAP.md).

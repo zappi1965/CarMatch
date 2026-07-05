@@ -8,3 +8,7 @@ build/
 .DS_Store
 coverage/
 apps/api/prisma/dev.db
+
+# Expo prebuild output (CI erzeugt android/ios selbst)
+apps/mobile/android/
+apps/mobile/ios/

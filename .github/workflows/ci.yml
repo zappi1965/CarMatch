@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  api:
+    name: API — Tests & Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm install -w apps/api -w packages/shared --no-audit --no-fund
+      - run: npx prisma generate
+        working-directory: apps/api
+      - run: npx tsc --noEmit
+        working-directory: apps/api
+      - run: npx vitest run
+        working-directory: apps/api
+
+  mobile:
+    name: Mobile — Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install --no-audit --no-fund
+        working-directory: apps/mobile
+      - run: npx tsc --noEmit
+        working-directory: apps/mobile
+
+  admin:
+    name: Admin — Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install -w apps/admin --no-audit --no-fund
+      - run: npm run build -w apps/admin
