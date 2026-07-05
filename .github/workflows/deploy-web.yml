@@ -1,0 +1,66 @@
+name: Deploy Web (GitHub Pages)
+
+# Baut die Expo-Web-Version (React Native Web) und veröffentlicht sie als
+# statische Seite auf GitHub Pages — Browser-Test ohne Installation.
+#
+# Einmalig nötig: Repo → Settings → Pages → "Build and deployment" →
+# Source auf "GitHub Actions" stellen (der Workflow versucht es via
+# configure-pages/enablement auch selbst).
+#
+# Optionales Secret EXPO_PUBLIC_API_URL: Backend-URL für den Web-Build
+# (ohne Backend zeigt die App auf localhost → Fahrzeuge laden erst mit API).
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/mobile/**'
+      - 'packages/shared/**'
+      - '.github/workflows/deploy-web.yml'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+        working-directory: apps/mobile
+      - name: Export web build
+        working-directory: apps/mobile
+        env:
+          EXPO_PUBLIC_API_URL: ${{ secrets.EXPO_PUBLIC_API_URL }}
+        run: npx expo export --platform web
+      - name: SPA-Fallback (404 → index) für Deep-Links
+        run: cp apps/mobile/dist/index.html apps/mobile/dist/404.html
+      - name: Disable Jekyll (Ordner mit _ zulassen)
+        run: touch apps/mobile/dist/.nojekyll
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/mobile/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v4
+        id: deployment
