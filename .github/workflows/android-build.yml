@@ -72,22 +72,9 @@ jobs:
           CARMATCH_UPLOAD_KEY_PASSWORD=${KEY_PASS:-carmatch-test}
           EOF
           # Release-Signing in build.gradle aktivieren (ersetzt Debug-Signing des Templates)
-          python3 - <<'PY'
-          import re
-          p = 'app/build.gradle'
-          s = open(p).read()
-          s = s.replace("""    signingConfigs {
-        debug {""", """    signingConfigs {
-        release {
-            storeFile file(CARMATCH_UPLOAD_STORE_FILE)
-            storePassword CARMATCH_UPLOAD_STORE_PASSWORD
-            keyAlias CARMATCH_UPLOAD_KEY_ALIAS
-            keyPassword CARMATCH_UPLOAD_KEY_PASSWORD
-        }
-        debug {""")
-          s = re.sub(r"(release \{[^}]*?signingConfig signingConfigs\.)debug", r"\1release", s, count=1, flags=re.S)
-          open(p, 'w').write(s)
-          PY
+          perl -0777 -pi -e 's/signingConfigs \{\n        debug \{/signingConfigs {\n        release {\n            storeFile file(CARMATCH_UPLOAD_STORE_FILE)\n            storePassword CARMATCH_UPLOAD_STORE_PASSWORD\n            keyAlias CARMATCH_UPLOAD_KEY_ALIAS\n            keyPassword CARMATCH_UPLOAD_KEY_PASSWORD\n        }\n        debug {/' app/build.gradle
+          perl -0777 -pi -e 's/(release \{[^}]*?signingConfig signingConfigs\.)debug/${1}release/s' app/build.gradle
+          grep -q 'signingConfigs.release' app/build.gradle && echo "signing ok" || { echo "signing patch failed"; exit 1; }
 
       - name: Build APK + AAB
         working-directory: apps/mobile/android
