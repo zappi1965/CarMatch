@@ -16,12 +16,19 @@ name: Android Build & Firebase Distribution
 
 on:
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Tag/Version für das GitHub-Release (z. B. v0.2.0)'
+        required: false
+        default: 'v0.2.0'
   push:
     tags: ['v*']
 
 jobs:
   android:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # nötig, damit der Job ein Release erstellen + Assets anhängen kann
     steps:
       - uses: actions/checkout@v4
 
@@ -89,6 +96,31 @@ jobs:
           path: |
             apps/mobile/android/app/build/outputs/apk/release/app-release.apk
             apps/mobile/android/app/build/outputs/bundle/release/app-release.aab
+
+      # Umbenennen mit Versionsname für aussagekräftige Release-Assets
+      - name: Rename release files
+        run: |
+          TAG="${{ github.event.inputs.release_tag || github.ref_name }}"
+          cp apps/mobile/android/app/build/outputs/apk/release/app-release.apk "CarMatch-${TAG}.apk"
+          cp apps/mobile/android/app/build/outputs/bundle/release/app-release.aab "CarMatch-${TAG}.aab"
+
+      - name: Create GitHub Release with APK + AAB
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.release_tag || github.ref_name }}
+          name: CarMatch ${{ github.event.inputs.release_tag || github.ref_name }}
+          body: |
+            Automatischer Android-Build (APK + AAB).
+
+            **Installation:** `CarMatch-*.apk` herunterladen, auf dem Android-Gerät öffnen,
+            „Aus unbekannter Quelle installieren" erlauben.
+
+            Test-signiert. Die API-URL ist die zum Build-Zeitpunkt gesetzte `EXPO_PUBLIC_API_URL`
+            (ohne Backend-Deploy: localhost → Fahrzeuge laden erst mit erreichbarer API).
+            Details siehe CHANGELOG.md.
+          files: |
+            CarMatch-*.apk
+            CarMatch-*.aab
 
       - name: Distribute to Firebase App Distribution
         env:
