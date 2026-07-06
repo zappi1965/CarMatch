@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "npx expo export --platform web",
+  "buildCommand": "EXPO_PUBLIC_API_URL=\"${EXPO_PUBLIC_API_URL:-https://carmatchapi-production.up.railway.app}\" npx expo export --platform web",
   "outputDirectory": "dist",
   "installCommand": "npm install --no-audit --no-fund",
   "framework": null,
