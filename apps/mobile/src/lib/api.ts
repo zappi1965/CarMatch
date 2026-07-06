@@ -9,7 +9,17 @@ const rawApiUrl =
   (process.env.EXPO_PUBLIC_API_URL || '').trim() ||
   ((Constants.expoConfig?.extra?.apiUrl as string | undefined) || '').trim() ||
   'http://localhost:4100'
-const API_URL: string = rawApiUrl.replace(/\/+$/, '')
+
+// Schema ergänzen, falls die URL ohne http(s):// gesetzt wurde (z. B. eine
+// Vercel-ENV `EXPO_PUBLIC_API_URL=carmatchapi-production.up.railway.app`).
+// Ohne Schema behandelt fetch() den Wert als RELATIVEN Pfad → Requests gehen
+// gegen die eigene Domain statt gegen das Backend (404). localhost bleibt http.
+function withScheme(url: string): string {
+  if (/^https?:\/\//i.test(url)) return url
+  const isLocal = /^(localhost|127\.0\.0\.1)(:|$)/i.test(url)
+  return `${isLocal ? 'http' : 'https'}://${url}`
+}
+const API_URL: string = withScheme(rawApiUrl).replace(/\/+$/, '')
 
 export class ApiError extends Error {
   constructor(
