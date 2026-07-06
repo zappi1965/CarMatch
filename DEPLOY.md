@@ -79,3 +79,58 @@ Für Produktion später auf die konkreten Frontend-Domains einschränken
 - **Railway:** Trial-/Hobby-Guthaben deckt einen kleinen API-Service + PostgreSQL.
 - **GitHub Pages & Actions:** für öffentliche Repos kostenlos.
 - **Firebase App Distribution:** kostenlos.
+
+---
+
+## 4. Web auf Vercel (Alternative/Ergänzung zu GitHub Pages)
+
+Vercel hostet die Browser-Version unter Root-Pfad (schöne URL, Auto-Deploys
+bei jedem Push, eigene Domain möglich). Config liegt in `apps/mobile/vercel.json`;
+die Web-baseUrl ist dynamisch (`app.config.js`) — auf Vercel automatisch Root.
+
+1. [vercel.com](https://vercel.com) → **Add New → Project** → Repo `zappi1965/CarMatch` importieren.
+2. **Root Directory** auf **`apps/mobile`** setzen (wichtig — Monorepo).
+   Framework Preset: **Other** (vercel.json übernimmt Build-Command + Output).
+3. **Environment Variable** hinzufügen:
+   `EXPO_PUBLIC_API_URL = https://carmatchapi-production.up.railway.app`
+4. **Deploy.** Ergebnis-URL z. B. `https://carmatch.vercel.app` — voll funktionsfähig,
+   lädt Fahrzeuge von der Railway-API.
+
+> `EXPO_BASE_URL` auf Vercel **nicht** setzen (Root-Pfad). Nur GitHub Pages
+> braucht `/CarMatch` — das setzt der Pages-Workflow selbst.
+
+---
+
+## 5. Expo — schnelle Mobile-Tests (EAS Update / Dev Client)
+
+Damit Tester JS-Änderungen **sofort** aufs Handy bekommen, ohne jedes Mal eine
+neue APK zu bauen (Over-the-Air-Updates).
+
+**Einmalige Einrichtung:**
+1. Expo-Konto anlegen: [expo.dev](https://expo.dev) → `npm i -g eas-cli` → `eas login`
+2. Im Projekt verknüpfen:
+   ```bash
+   cd apps/mobile
+   eas init                 # schreibt extra.eas.projectId in app.json
+   eas update:configure     # richtet updates.url + runtimeVersion ein
+   ```
+3. **Access Token** erzeugen (expo.dev → Account → Access Tokens) und als
+   GitHub-Secret **`EXPO_TOKEN`** hinterlegen.
+
+**Test-Varianten:**
+- **Sofort per Expo Go / QR (lokal):**
+  ```bash
+  cd apps/mobile && npx expo start
+  ```
+  QR-Code mit der Expo-Go-App scannen → App live auf dem Handy, Hot Reload.
+- **OTA-Update für Tester (remote):** Workflow **„EAS Update"** läuft automatisch
+  bei jedem Push auf `main` (sobald `EXPO_TOKEN` gesetzt ist) und published ins
+  `preview`-Channel. Tester mit einem Dev-/Preview-Build sehen das Update beim
+  nächsten App-Start — ohne Neuinstallation.
+- **Dev-/Preview-Build** (einmalig, echte native App mit OTA-Empfang):
+  ```bash
+  npm run build:android:apk    # Profil "preview" (channel: preview)
+  ```
+
+> Für den reinen Klick-Test reicht die bestehende Release-APK. EAS Update lohnt,
+> sobald du häufig iterierst und Tester nicht jedes Mal neu installieren sollen.
