@@ -49,7 +49,7 @@
       "expo-notifications"
     ],
     "extra": {
-      "apiUrl": "http://localhost:4100"
+      "apiUrl": "https://carmatchapi-production.up.railway.app"
     },
     "experiments": {
       "baseUrl": "/CarMatch"

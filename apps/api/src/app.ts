@@ -40,7 +40,7 @@ export async function buildApp() {
     reply.code(status).send({ ok: false, error: status === 500 ? 'INTERNAL' : err.message })
   })
 
-  app.get('/health', async () => ({ ok: true, version: '0.1.0' }))
+  app.get('/health', async () => ({ ok: true, version: '0.2.0' }))
 
   await app.register(authRoutes, { prefix: '/auth' })
   await app.register(vehicleRoutes, { prefix: '/vehicles' })
