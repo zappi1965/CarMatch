@@ -50,9 +50,6 @@
     ],
     "extra": {
       "apiUrl": "https://carmatchapi-production.up.railway.app"
-    },
-    "experiments": {
-      "baseUrl": "/CarMatch"
     }
   }
 }

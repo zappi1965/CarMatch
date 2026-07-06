@@ -43,6 +43,7 @@ jobs:
         working-directory: apps/mobile
         env:
           EXPO_PUBLIC_API_URL: ${{ secrets.EXPO_PUBLIC_API_URL }}
+          EXPO_BASE_URL: /CarMatch
         run: npx expo export --platform web
       - name: SPA-Fallback (404 → index) für Deep-Links
         run: cp apps/mobile/dist/index.html apps/mobile/dist/404.html

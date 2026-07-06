@@ -1,0 +1,53 @@
+name: EAS Update (OTA für mobile Tests)
+
+# Veröffentlicht ein Over-the-Air-Update ins EAS-Update-System, damit Tester
+# die neueste JS-Version SOFORT im Dev-/Preview-Build oder Expo Go sehen —
+# ohne neuen Store-/APK-Build.
+#
+# Voraussetzung (einmalig, siehe DEPLOY.md):
+#   1. Expo-Konto + `eas init` im Projekt (setzt extra.eas.projectId)
+#   2. Repository-Secret EXPO_TOKEN (Expo → Account → Access Tokens)
+#   3. Optional EXPO_PUBLIC_API_URL (Backend-URL fürs Update-Bundle)
+
+on:
+  workflow_dispatch:
+    inputs:
+      message:
+        description: 'Update-Nachricht'
+        required: false
+        default: 'Manuelles Update'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/mobile/**'
+      - 'packages/shared/**'
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Guard — nur mit EXPO_TOKEN
+        id: guard
+        run: |
+          if [ -z "${{ secrets.EXPO_TOKEN }}" ]; then
+            echo "EXPO_TOKEN nicht gesetzt — EAS Update übersprungen (siehe DEPLOY.md)."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Install dependencies
+        if: steps.guard.outputs.skip != 'true'
+        run: npm install --no-audit --no-fund
+        working-directory: apps/mobile
+      - name: Publish EAS Update
+        if: steps.guard.outputs.skip != 'true'
+        working-directory: apps/mobile
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          EXPO_PUBLIC_API_URL: ${{ secrets.EXPO_PUBLIC_API_URL }}
+        run: |
+          npx eas-cli@latest update --branch preview \
+            --message "${{ github.event.inputs.message || github.event.head_commit.message }}" \
+            --non-interactive
