@@ -20,5 +20,7 @@ RUN npx prisma generate
 ENV NODE_ENV=production
 EXPOSE 4100
 
-# Migrationen beim Start anwenden; SEED_ON_BOOT=true lädt Demo-Daten (nur Staging!)
-CMD ["sh", "-c", "npx prisma migrate deploy && if [ \"$SEED_ON_BOOT\" = \"true\" ]; then npm run seed || true; fi && npm run start"]
+# Schema beim Start in die DB syncen (db push — kein Migrations-Ordner nötig,
+# ideal fürs Test-/Staging-Deploy). SEED_ON_BOOT=true lädt Demo-Daten.
+# Für echte Produktion später auf `prisma migrate deploy` + Migrations umstellen.
+CMD ["sh", "-c", "npx prisma db push --skip-generate --accept-data-loss && if [ \"$SEED_ON_BOOT\" = \"true\" ]; then npm run seed || true; fi && npm run start"]

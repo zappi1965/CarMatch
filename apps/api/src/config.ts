@@ -35,6 +35,10 @@ const envSchema = z.object({
   // Rate Limits
   RATE_LIMIT_PER_MINUTE: z.coerce.number().default(120),
   SYNC_INTERVAL_MINUTES: z.coerce.number().default(30),
+
+  // Staging/Test-Deploy: erlaubt Demo-Daten auch bei NODE_ENV=production
+  // (App kennzeichnet alle Demo-Inserate klar als DEMO). Nur für Test-Umgebungen!
+  DEMO_MODE: z.coerce.boolean().default(false),
 })
 
 export type AppConfig = z.infer<typeof envSchema>
@@ -48,7 +52,12 @@ export const enabledProviders = config.ENABLED_PROVIDERS.split(',')
 if (config.NODE_ENV === 'production' && config.JWT_SECRET === 'dev-only-secret-change-me') {
   throw new Error('JWT_SECRET muss in Produktion gesetzt sein')
 }
-if (config.NODE_ENV === 'production' && enabledProviders.includes('demo')) {
-  // Demo-Daten sind strikt von Produktion getrennt
-  throw new Error('Der Demo-Provider darf in Produktion nicht aktiviert sein (ENABLED_PROVIDERS)')
+// Demo-Daten sind strikt von echter Produktion getrennt — außer im
+// ausdrücklichen Test-/Staging-Deploy (DEMO_MODE=true), z. B. für den
+// Firebase-/Browser-Test mit Demo-Inseraten.
+if (config.NODE_ENV === 'production' && enabledProviders.includes('demo') && !config.DEMO_MODE) {
+  throw new Error(
+    'Der Demo-Provider darf in Produktion nicht aktiviert sein (ENABLED_PROVIDERS). ' +
+      'Für ein Test-Deploy mit Demo-Daten setze DEMO_MODE=true.',
+  )
 }
