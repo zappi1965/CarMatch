@@ -3,6 +3,8 @@ import { distanceKm } from '@carmatch/shared'
 import type { DealerContact, VehicleProviderAdapter } from '../types.js'
 import { demoListings } from './demoListings.js'
 import { findModelImage } from '../../models/modelImages.js'
+import { generateBulkDemoListings } from './generateBulkDemo.js'
+import { config } from '../../config.js'
 
 /**
  * DemoProviderAdapter — NUR für Entwicklung/Tests.
@@ -34,7 +36,10 @@ export class DemoProviderAdapter implements VehicleProviderAdapter {
   }
 
   async syncListings(): Promise<NormalizedListing[]> {
-    return demoListings.map((l) => this.normalizeListing(l))
+    const curated = demoListings.map((l) => this.normalizeListing(l))
+    // Optional hunderte synthetische Varianten für Test/Last (DEMO_BULK_COUNT)
+    const generated = config.DEMO_BULK_COUNT > 0 ? generateBulkDemoListings(config.DEMO_BULK_COUNT) : []
+    return [...curated, ...generated]
   }
 
   async searchListings(
