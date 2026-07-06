@@ -1,12 +1,15 @@
 import Constants from 'expo-constants'
 import { useSession } from './store'
 
-// Build-Konfiguration (EAS): EXPO_PUBLIC_API_URL wird zur Buildzeit eingebettet.
-// Entwicklung: extra.apiUrl aus app.json (localhost).
-const API_URL: string =
-  process.env.EXPO_PUBLIC_API_URL ??
-  (Constants.expoConfig?.extra?.apiUrl as string | undefined) ??
+// Build-Konfiguration (EAS/Vercel): EXPO_PUBLIC_API_URL wird zur Buildzeit
+// eingebettet. Wichtig: `||` statt `??`, damit ein LEERER String (z. B. eine
+// leere Vercel-ENV) auf extra.apiUrl zurückfällt — sonst würde die App relative
+// Pfade gegen die eigene Domain aufrufen (404). Trailing-Slash normalisieren.
+const rawApiUrl =
+  (process.env.EXPO_PUBLIC_API_URL || '').trim() ||
+  ((Constants.expoConfig?.extra?.apiUrl as string | undefined) || '').trim() ||
   'http://localhost:4100'
+const API_URL: string = rawApiUrl.replace(/\/+$/, '')
 
 export class ApiError extends Error {
   constructor(
