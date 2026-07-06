@@ -39,6 +39,10 @@ const envSchema = z.object({
   // Staging/Test-Deploy: erlaubt Demo-Daten auch bei NODE_ENV=production
   // (App kennzeichnet alle Demo-Inserate klar als DEMO). Nur für Test-Umgebungen!
   DEMO_MODE: z.coerce.boolean().default(false),
+
+  // Anzahl zusätzlich generierter synthetischer Demo-Inserate (0 = aus).
+  // Nur für Test/Last — rein synthetisch, klar als DEMO gekennzeichnet.
+  DEMO_BULK_COUNT: z.coerce.number().int().min(0).max(5000).default(0),
 })
 
 export type AppConfig = z.infer<typeof envSchema>

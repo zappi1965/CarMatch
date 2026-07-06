@@ -27,6 +27,7 @@ Das Repo ist deploy-ready: `Dockerfile` + `railway.json` liegen im Root.
    | `DEMO_MODE` | `true` | erlaubt Demo-Daten im Test-Deploy |
    | `ENABLED_PROVIDERS` | `demo` | Demo-Inserate als Quelle |
    | `SEED_ON_BOOT` | `true` | lädt beim Start Demo-Inserate + 20 Modelle |
+   | `DEMO_BULK_COUNT` | `800` | zusätzliche synthetische Demo-Inserate (Test/Last) |
    | `JWT_SECRET` | *(langer Zufallsstring)* | Pflicht in production |
    | `ADMIN_TOKEN` | *(Zufallsstring)* | Login fürs Admin-Panel |
    | `PORT` | `4100` | (Railway setzt `PORT` oft selbst — dann weglassen) |
